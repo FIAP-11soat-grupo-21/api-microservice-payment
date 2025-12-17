@@ -7,8 +7,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	payment_router "payment_microservice/internal/core/infra/api/routes"
-
+	"payment_microservice/internal/adapters/driver/api/routes"
 	"payment_microservice/internal/common/config/env"
 	"payment_microservice/internal/common/infra/api/middlewares"
 	_ "payment_microservice/internal/common/infra/api/swagger"
@@ -39,7 +38,7 @@ func Init() {
 
 	v1Routes := ginRouter.Group("/v1")
 
-	payment_router.RegisterPaymentRoutes(v1Routes.Group("/payments"))
+	routes.RegisterPaymentRoutes(v1Routes.Group("/payments"))
 
 	ginRouter.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{"status": "healthy"})

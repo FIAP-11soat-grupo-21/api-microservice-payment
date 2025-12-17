@@ -3,6 +3,7 @@ package database
 import (
 	"log"
 	"os"
+	"payment_microservice/internal/adapters/driven/repositories"
 	"payment_microservice/internal/common/config/env"
 	"sync"
 	"time"
@@ -10,8 +11,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-
-	payment_models "payment_microservice/internal/core/infra/database/models"
 )
 
 var (
@@ -99,6 +98,6 @@ func Close() {
 
 func RunMigrations() {
 	dbConnection.AutoMigrate(
-		&payment_models.PaymentModel{},
+		&repositories.PaymentModel{},
 	)
 }

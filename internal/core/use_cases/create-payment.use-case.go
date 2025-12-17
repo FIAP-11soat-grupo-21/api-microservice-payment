@@ -3,23 +3,25 @@ package use_cases
 import (
 	"fmt"
 	identity_manager "payment_microservice/internal/common/pkg/identity"
-	"payment_microservice/internal/core/application/dtos"
-	"payment_microservice/internal/core/application/gateways"
 	"payment_microservice/internal/core/domain/entities"
 	"payment_microservice/internal/core/domain/exceptions"
+	"payment_microservice/internal/core/domain/ports"
+	"payment_microservice/internal/core/dto"
 )
 
 type CreatePaymentUseCase struct {
-	gateway gateways.PaymentGateway
+	repository ports.IPaymentRepository
+	gateway    ports.IPaymentGateway
 }
 
-func NewCreatePaymentUseCase(gateway gateways.PaymentGateway) *CreatePaymentUseCase {
+func NewCreatePaymentUseCase(repository ports.IPaymentRepository, gateway ports.IPaymentGateway) *CreatePaymentUseCase {
 	return &CreatePaymentUseCase{
-		gateway: gateway,
+		repository: repository,
+		gateway:    gateway,
 	}
 }
 
-func (uc *CreatePaymentUseCase) Execute(paymentDTO dtos.CreatePaymentDTO) (entities.Payment, error) {
+func (uc *CreatePaymentUseCase) Execute(paymentDTO dto.CreatePaymentDTO) (entities.Payment, error) {
 	var qrData *string
 
 	payment, err := entities.NewPaymentDefault(
@@ -34,16 +36,12 @@ func (uc *CreatePaymentUseCase) Execute(paymentDTO dtos.CreatePaymentDTO) (entit
 		return entities.Payment{}, err
 	}
 
-	err = uc.gateway.Insert(paymentDTO.Ctx, *payment)
-
-	if err != nil {
-		return entities.Payment{}, &exceptions.InvalidPaymentDataException{
-			Message: "Failed to insert payment",
-		}
-	}
-
 	if payment.Method.IsPix() {
-		pixBillingResult, err := uc.gateway.CreatePIXBilling(paymentDTO.Ctx, *payment)
+		pixBillingResult, err := uc.gateway.CreatePIXBilling(dto.CreatePIXBillingDTO{
+			Ctx:        paymentDTO.Ctx,
+			ExternalID: payment.ID,
+			Amount:     payment.Amount.Value(),
+		})
 
 		if err != nil {
 			return entities.Payment{}, &exceptions.InvalidPaymentDataException{
@@ -53,11 +51,19 @@ func (uc *CreatePaymentUseCase) Execute(paymentDTO dtos.CreatePaymentDTO) (entit
 
 		payment.SetQrCode(pixBillingResult.QRData)
 
-		err = uc.gateway.Update(paymentDTO.Ctx, *payment)
+		// err = uc.repository.Update(paymentDTO.Ctx, *payment)
+
+		// if err != nil {
+		// 	return entities.Payment{}, &exceptions.InvalidPaymentDataException{
+		// 		Message: "Failed to update payment with QR data",
+		// 	}
+		// }
+
+		err = uc.repository.Insert(paymentDTO.Ctx, *payment)
 
 		if err != nil {
 			return entities.Payment{}, &exceptions.InvalidPaymentDataException{
-				Message: "Failed to update payment with QR data",
+				Message: "Failed to insert payment on database",
 			}
 		}
 

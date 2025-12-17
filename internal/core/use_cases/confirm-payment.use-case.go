@@ -4,23 +4,23 @@ import (
 	"context"
 	"fmt"
 
-	"payment_microservice/internal/core/application/dtos"
-	payment_gateway "payment_microservice/internal/core/application/gateways"
 	"payment_microservice/internal/core/domain/exceptions"
+	"payment_microservice/internal/core/domain/ports"
+	"payment_microservice/internal/core/dto"
 )
 
 type ConfirmPaymentUseCase struct {
-	Gateway payment_gateway.PaymentGateway
+	repository ports.IPaymentRepository
 }
 
-func NewConfirmPaymentUseCase(gateway payment_gateway.PaymentGateway) *ConfirmPaymentUseCase {
+func NewConfirmPaymentUseCase(repository ports.IPaymentRepository) *ConfirmPaymentUseCase {
 	return &ConfirmPaymentUseCase{
-		Gateway: gateway,
+		repository: repository,
 	}
 }
 
-func (uc *ConfirmPaymentUseCase) Execute(ctx context.Context, dto dtos.WebhookEventDTO) error {
-	payment, err := uc.Gateway.FindByOrderID(dto.OrderID)
+func (uc *ConfirmPaymentUseCase) Execute(ctx context.Context, dto dto.WebhookEventDTO) error {
+	payment, err := uc.repository.FindByOrderID(ctx, dto.OrderID)
 
 	if err != nil {
 		return &exceptions.PaymentNotFoundException{
@@ -31,7 +31,7 @@ func (uc *ConfirmPaymentUseCase) Execute(ctx context.Context, dto dtos.WebhookEv
 	if dto.Type == "payment" && dto.Action == "payment.updated" {
 		payment.Status.SetPaid()
 
-		uc.Gateway.Confirm(ctx, payment)
+		uc.repository.Update(ctx, payment)
 	}
 
 	return nil

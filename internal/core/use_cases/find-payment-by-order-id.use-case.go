@@ -1,23 +1,24 @@
 package use_cases
 
 import (
-	"payment_microservice/internal/core/application/gateways"
+	"context"
 	"payment_microservice/internal/core/domain/entities"
 	"payment_microservice/internal/core/domain/exceptions"
+	"payment_microservice/internal/core/domain/ports"
 )
 
 type FindPaymentByOrderIDUseCase struct {
-	Gateway gateways.PaymentGateway
+	repository ports.IPaymentRepository
 }
 
-func NewFindPaymentByOrderIDUseCase(gateway gateways.PaymentGateway) *FindPaymentByOrderIDUseCase {
+func NewFindPaymentByOrderIDUseCase(repository ports.IPaymentRepository) *FindPaymentByOrderIDUseCase {
 	return &FindPaymentByOrderIDUseCase{
-		Gateway: gateway,
+		repository: repository,
 	}
 }
 
-func (uc *FindPaymentByOrderIDUseCase) Execute(orderID string) (entities.Payment, error) {
-	payment, err := uc.Gateway.FindByOrderID(orderID)
+func (uc *FindPaymentByOrderIDUseCase) Execute(ctx context.Context, orderID string) (entities.Payment, error) {
+	payment, err := uc.repository.FindByOrderID(ctx, orderID)
 
 	if err != nil {
 		return entities.Payment{}, &exceptions.PaymentNotFoundException{}

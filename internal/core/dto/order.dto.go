@@ -1,4 +1,4 @@
-package dtos
+package dto
 
 type WebhookEventDTO struct {
 	ID          string

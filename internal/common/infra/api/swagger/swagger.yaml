@@ -1,4 +1,55 @@
 basePath: /v1
+definitions:
+  schemas.ConfirmPaymentSchema:
+    properties:
+      action:
+        type: string
+      api_version:
+        type: string
+      data:
+        properties:
+          id:
+            type: string
+        type: object
+      date_created:
+        type: string
+      id:
+        type: string
+      live_mode:
+        type: boolean
+      type:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  schemas.CreatePixBillingSchema:
+    properties:
+      amount:
+        type: number
+      order_id:
+        type: string
+    type: object
+  schemas.PaymentResponseSchema:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: string
+      method:
+        type: string
+      order_id:
+        type: string
+      paid_at:
+        type: string
+      qr_code:
+        type: string
+      status:
+        type: string
+      transaction_code:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -11,6 +62,8 @@ info:
 paths:
   /payments/order/{orderID}:
     get:
+      consumes:
+      - application/json
       parameters:
       - description: Order ID
         in: path
@@ -19,7 +72,13 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.PaymentResponseSchema'
+        "500":
+          description: Internal Server Error
       summary: Get a payment by OrderID
       tags:
       - Payments
@@ -27,7 +86,22 @@ paths:
     post:
       consumes:
       - application/json
-      responses: {}
+      parameters:
+      - description: Pix billing to create
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.CreatePixBillingSchema'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/schemas.PaymentResponseSchema'
+        "500":
+          description: Internal Server Error
       summary: Create Pix Billing
       tags:
       - Payments
@@ -35,7 +109,20 @@ paths:
     post:
       consumes:
       - application/json
-      responses: {}
+      parameters:
+      - description: Payment confirmation webhook
+        in: body
+        name: webhook
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.ConfirmPaymentSchema'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
       summary: Confirm Payment
       tags:
       - Payments

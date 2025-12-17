@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
+	"payment_microservice/internal/adapters/driver/api/handlers"
 
-	"payment_microservice/internal/core/infra/api/handlers"
+	"github.com/gin-gonic/gin"
 )
 
 func RegisterPaymentRoutes(router *gin.RouterGroup) {

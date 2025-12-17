@@ -1,4 +1,4 @@
-package dtos
+package dto
 
 import (
 	"context"
@@ -22,4 +22,14 @@ type PaymentResultDTO struct {
 	QRCode          *string
 	CreatedAt       time.Time
 	PaidAt          *time.Time
+}
+
+type CreatePIXBillingDTO struct {
+	Ctx        context.Context
+	ExternalID string
+	Amount     float64
+}
+
+type PIXBillingResultDTO struct {
+	QRData string
 }

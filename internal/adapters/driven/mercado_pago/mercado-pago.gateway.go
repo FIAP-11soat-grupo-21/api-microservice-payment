@@ -4,20 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"payment_microservice/internal/core/daos"
+	dtos "payment_microservice/internal/core/dto"
 )
 
-type MercadoPagoProvider struct {
+type MercadoPagoGateway struct {
 	client *MercadoPagoClient
 	cfg    *MercadoPagoConfig
 }
 
-func NewMercadoPagoProvider() *MercadoPagoProvider {
+func NewMercadoPagoGateway() *MercadoPagoGateway {
 	client := NewClient()
 	cfg := client.GetConfig()
 
-	return &MercadoPagoProvider{
+	return &MercadoPagoGateway{
 		client: client,
 		cfg:    cfg,
 	}
@@ -50,7 +49,7 @@ type QRCodeAPIResponse struct {
 	QRData string `json:"qr_data"`
 }
 
-func (c *MercadoPagoProvider) CreatePIXBilling(pixBilling daos.CreatePIXBillingDAO) (daos.PIXBillingResultDAO, error) {
+func (c *MercadoPagoGateway) CreatePIXBilling(pixBilling dtos.CreatePIXBillingDTO) (dtos.PIXBillingResultDTO, error) {
 	url := fmt.Sprintf(
 		"/instore/orders/qr/seller/collectors/%d/pos/%s/qrs",
 		c.cfg.CollectorID,
@@ -78,7 +77,7 @@ func (c *MercadoPagoProvider) CreatePIXBilling(pixBilling daos.CreatePIXBillingD
 	jsonBody, err := json.Marshal(body)
 
 	if err != nil {
-		return daos.PIXBillingResultDAO{}, fmt.Errorf("erro ao serializar o corpo da requisição: %w", err)
+		return dtos.PIXBillingResultDTO{}, fmt.Errorf("erro ao serializar o corpo da requisição: %w", err)
 	}
 
 	resp, err := c.client.DoRequest(
@@ -90,16 +89,16 @@ func (c *MercadoPagoProvider) CreatePIXBilling(pixBilling daos.CreatePIXBillingD
 	)
 
 	if err != nil {
-		return daos.PIXBillingResultDAO{}, err
+		return dtos.PIXBillingResultDTO{}, err
 	}
 
 	var apiResp QRCodeAPIResponse
 
 	if err := json.Unmarshal(resp, &apiResp); err != nil {
-		return daos.PIXBillingResultDAO{}, fmt.Errorf("erro ao realizar JSON parse da resposta do MP: %w", err)
+		return dtos.PIXBillingResultDTO{}, fmt.Errorf("erro ao realizar JSON parse da resposta do MP: %w", err)
 	}
 
-	return daos.PIXBillingResultDAO{
+	return dtos.PIXBillingResultDTO{
 		QRData: apiResp.QRData,
 	}, nil
 }
