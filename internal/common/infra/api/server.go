@@ -41,5 +41,9 @@ func Init() {
 
 	payment_router.RegisterPaymentRoutes(v1Routes.Group("/payments"))
 
+	ginRouter.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{"status": "healthy"})
+	})
+
 	ginRouter.Run(config.API.URL)
 }

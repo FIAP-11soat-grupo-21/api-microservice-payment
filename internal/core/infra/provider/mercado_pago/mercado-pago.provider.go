@@ -90,7 +90,7 @@ func (c *MercadoPagoProvider) CreatePIXBilling(pixBilling daos.CreatePIXBillingD
 	)
 
 	if err != nil {
-		return daos.PIXBillingResultDAO{}, fmt.Errorf("erro ao chamar MP GenerateQRCode: %w", err)
+		return daos.PIXBillingResultDAO{}, err
 	}
 
 	var apiResp QRCodeAPIResponse

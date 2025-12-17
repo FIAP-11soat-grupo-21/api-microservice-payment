@@ -5,11 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"payment_microservice/internal/common/config/constants"
 	"payment_microservice/internal/core/application/controllers"
 	"payment_microservice/internal/core/application/dtos"
 	payment_factories "payment_microservice/internal/core/factories"
 	"payment_microservice/internal/core/infra/api/schemas"
-	kitchen_order_factories "tech_challenge/internal/kitchen-order/factories"
 )
 
 type PaymentHandler struct {
@@ -19,13 +19,39 @@ type PaymentHandler struct {
 func NewPaymentHandler() *PaymentHandler {
 	paymentDataSource := payment_factories.NewPaymentDataSource()
 	paymentProvider := payment_factories.NewPaymentProvider()
-	kitchenOrderDataSource := kitchen_order_factories.NewKitchenOrderDataSource()
-	orderStatusDataSource := kitchen_order_factories.NewOrderStatusDataSource()
-	paymentController := controllers.NewPaymentController(paymentDataSource, paymentProvider, kitchenOrderDataSource, orderStatusDataSource)
+	paymentController := controllers.NewPaymentController(paymentDataSource, paymentProvider)
 
 	return &PaymentHandler{
 		paymentController: *paymentController,
 	}
+}
+
+// @Summary Create Pix Billing
+// @Tags Payments
+// @Accept json
+// @Router /payments/pix [post]
+func (ph *PaymentHandler) CreatePixBilling(ctx *gin.Context) {
+	var createPixBillingBody schemas.CreatePixBillingSchema
+
+	if err := ctx.ShouldBindJSON(&createPixBillingBody); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	paymentDTO := dtos.CreatePaymentDTO{
+		Ctx:     ctx,
+		OrderID: createPixBillingBody.OrderID,
+		Amount:  createPixBillingBody.Amount,
+		Method:  constants.PIX_PAYMENT_METHOD,
+	}
+
+	res, err := ph.paymentController.CreatePayment(paymentDTO)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, res)
 }
 
 // @Summary Confirm Payment
@@ -64,7 +90,7 @@ func (ph *PaymentHandler) ConfirmPayment(ctx *gin.Context) {
 // @Tags Payments
 // @Produce json
 // @Param orderID path string true "Order ID"
-// @Router /payments/{orderID} [get]
+// @Router /payments/order/{orderID} [get]
 func (h *PaymentHandler) FindByOrderID(ctx *gin.Context) {
 	orderID := ctx.Param("orderID")
 

@@ -73,6 +73,9 @@ func (c *MercadoPagoClient) DoRequest(ctx context.Context, method string, path s
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		responseBody, _ := io.ReadAll(resp.Body)
+		fmt.Println(string(responseBody))
+
 		return nil, fmt.Errorf("request failed with status code %d", resp.StatusCode)
 	}
 

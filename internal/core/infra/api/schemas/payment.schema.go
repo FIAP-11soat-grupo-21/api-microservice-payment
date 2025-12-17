@@ -2,6 +2,11 @@ package schemas
 
 import "time"
 
+type CreatePixBillingSchema struct {
+	OrderID string  `json:"order_id"`
+	Amount  float64 `json:"amount"`
+}
+
 type ConfirmPaymentSchema struct {
 	ID          string `json:"id"`
 	LiveMode    bool   `json:"live_mode"`

@@ -9,6 +9,7 @@ import (
 func RegisterPaymentRoutes(router *gin.RouterGroup) {
 	paymentHandler := handlers.NewPaymentHandler()
 
+	router.POST("/pix", paymentHandler.CreatePixBilling)
 	router.POST("/webhook", paymentHandler.ConfirmPayment)
-	router.GET("/:orderID", paymentHandler.FindByOrderID)
+	router.GET("/order/:orderID", paymentHandler.FindByOrderID)
 }
