@@ -13,14 +13,16 @@ import (
 )
 
 type PaymentHandler struct {
-	repository ports.IPaymentRepository
-	gateway    ports.IPaymentGateway
+	repository          ports.IPaymentRepository
+	gateway             ports.IPaymentGateway
+	kitchenOrderService ports.IKitchenOrderService
 }
 
 func NewPaymentHandler() *PaymentHandler {
 	return &PaymentHandler{
-		repository: factory.NewPaymentRepository(),
-		gateway:    factory.NewPaymentGateway(),
+		repository:          factory.NewPaymentRepository(),
+		gateway:             factory.NewPaymentGateway(),
+		kitchenOrderService: factory.NewKitchenOrderService(),
 	}
 }
 
@@ -104,7 +106,7 @@ func (ph *PaymentHandler) ConfirmPayment(ctx *gin.Context) {
 		OrderID:     confirmPaymentBody.Data.ID,
 	}
 
-	confirmPaymentUseCase := use_cases.NewConfirmPaymentUseCase(ph.repository)
+	confirmPaymentUseCase := use_cases.NewConfirmPaymentUseCase(ph.repository, ph.kitchenOrderService)
 
 	err := confirmPaymentUseCase.Execute(ctx, eventDTO)
 

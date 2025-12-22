@@ -29,6 +29,11 @@ type Config struct {
 		ExternalPosID string
 		ApiBaseURL    string
 	}
+	RabbitMQ struct {
+		URL                     string
+		Exchange                string
+		CreateKitchenOrderTopic string
+	}
 }
 
 var (
@@ -80,6 +85,10 @@ func (c *Config) Load() {
 	c.MercadoPago.CollectorID = getEnv("MERCADOPAGO_COLLECTOR_ID")
 	c.MercadoPago.ExternalPosID = getEnv("MERCADOPAGO_EXTERNAL_POS_ID")
 	c.MercadoPago.ApiBaseURL = getEnv("MERCADOPAGO_API_URL")
+
+	c.RabbitMQ.URL = getEnv("RABBITMQ_URL")
+	c.RabbitMQ.Exchange = getEnv("RABBITMQ_EXCHANGE")
+	c.RabbitMQ.CreateKitchenOrderTopic = getEnv("RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC")
 }
 
 func (c *Config) IsProduction() bool {

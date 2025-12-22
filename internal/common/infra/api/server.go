@@ -12,6 +12,7 @@ import (
 	"payment_microservice/internal/common/infra/api/middlewares"
 	_ "payment_microservice/internal/common/infra/api/swagger"
 	"payment_microservice/internal/common/infra/database"
+	"payment_microservice/internal/common/infra/queue"
 )
 
 func Init() {
@@ -27,6 +28,8 @@ func Init() {
 	if config.Database.RunMigrations {
 		database.RunMigrations()
 	}
+
+	queue.Connect()
 
 	ginRouter := gin.Default()
 

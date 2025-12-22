@@ -9,6 +9,15 @@ services:
       - postgres:/var/lib/postgresql/data
     networks:
       - backbone
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    networks:
+      - backbone
   api:
     build: 
       context: .
@@ -26,6 +35,7 @@ services:
 
 volumes:
   postgres:
+  rabbitmq:
 
 networks:
   backbone:
