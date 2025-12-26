@@ -8,11 +8,33 @@ import (
 	"payment_microservice/internal/core/dto"
 )
 
-type RabbitMQKitchenOrderService struct{}
+// Refact this to another package
+type QueuePublisher interface {
+	PublishMessageWithContext(ctx context.Context, routingKey string, body []byte) error
+}
+
+type DefaultQueuePublisher struct{}
+
+func (d *DefaultQueuePublisher) PublishMessageWithContext(ctx context.Context, routingKey string, body []byte) error {
+	return queue.PublishMessageWithContext(ctx, routingKey, body)
+}
+
+type RabbitMQKitchenOrderService struct {
+	publisher QueuePublisher
+}
 
 func NewRabbitMQKitchenOrderService() *RabbitMQKitchenOrderService {
-	return &RabbitMQKitchenOrderService{}
+	return &RabbitMQKitchenOrderService{
+		publisher: &DefaultQueuePublisher{},
+	}
 }
+
+func NewRabbitMQKitchenOrderServiceWithPublisher(publisher QueuePublisher) *RabbitMQKitchenOrderService {
+	return &RabbitMQKitchenOrderService{
+		publisher: publisher,
+	}
+}
+
 func (s *RabbitMQKitchenOrderService) Create(ctx context.Context, dto dto.CreateKitchenOrderDTO) error {
 	dtoJSON, err := json.Marshal(dto)
 
@@ -24,7 +46,7 @@ func (s *RabbitMQKitchenOrderService) Create(ctx context.Context, dto dto.Create
 
 	kitchenOrderQueueName := cfg.RabbitMQ.CreateKitchenOrderTopic
 
-	return queue.PublishMessageWithContext(
+	return s.publisher.PublishMessageWithContext(
 		ctx,
 		kitchenOrderQueueName,
 		dtoJSON,

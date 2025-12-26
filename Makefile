@@ -5,7 +5,7 @@ test:
 	go test ./...
 
 test-coverage:
-	go test ./... -coverprofile=coverage.out
+	go test ./... -coverprofile=coverage.out -coverpkg=./...
 	go tool cover -func=coverage.out | tail -1
 
 test-coverage-html:

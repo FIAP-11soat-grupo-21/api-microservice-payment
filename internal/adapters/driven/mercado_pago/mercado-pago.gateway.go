@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"payment_microservice/internal/common/config/env"
 	dtos "payment_microservice/internal/core/dto"
 )
 
@@ -19,6 +20,13 @@ func NewMercadoPagoGateway() *MercadoPagoGateway {
 	return &MercadoPagoGateway{
 		client: client,
 		cfg:    cfg,
+	}
+}
+
+func NewMercadoPagoGatewayWithClient(client *MercadoPagoClient) *MercadoPagoGateway {
+	return &MercadoPagoGateway{
+		client: client,
+		cfg:    client.GetConfig(),
 	}
 }
 
@@ -56,11 +64,18 @@ func (c *MercadoPagoGateway) CreatePIXBilling(pixBilling dtos.CreatePIXBillingDT
 		c.cfg.ExternalPosID,
 	)
 
+	idPrefix := pixBilling.ExternalID
+	if len(idPrefix) > 8 {
+		idPrefix = idPrefix[:8]
+	}
+
+	cfg := env.GetConfig()
+
 	body := qrCodeRequestBody{
 		ExternalReference: pixBilling.ExternalID,
-		Title:             fmt.Sprintf("Pagamento Pedido %s", pixBilling.ExternalID[:8]),
+		Title:             fmt.Sprintf("Pagamento Pedido %s", idPrefix),
 		Description:       fmt.Sprintf("Pagamento de R$ %.2f para a ordem %s", pixBilling.Amount, pixBilling.ExternalID),
-		NotificationURL:   "https://tech-challenge.com.br", // Sem definição temporariamente
+		NotificationURL:   cfg.API.WebhookURL,
 		TotalAmount:       pixBilling.Amount,
 		Items: []qrItem{
 			{

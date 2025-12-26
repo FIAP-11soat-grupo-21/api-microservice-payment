@@ -1,0 +1,36 @@
+package factory
+
+import (
+	"payment_microservice/internal/common/config/env"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNewPaymentRepository(t *testing.T) {
+	cleanup := env.SetupTestEnv(t)
+	defer cleanup()
+
+	t.Run("should create payment repository successfully", func(t *testing.T) {
+		repository := NewPaymentRepository()
+
+		assert.NotNil(t, repository)
+	})
+
+	t.Run("should return IPaymentRepository interface", func(t *testing.T) {
+		repository := NewPaymentRepository()
+
+		assert.NotNil(t, repository)
+		assert.Implements(t, (*interface{})(nil), repository)
+	})
+
+	t.Run("should create new instance on each call", func(t *testing.T) {
+		repository1 := NewPaymentRepository()
+		repository2 := NewPaymentRepository()
+
+		assert.NotNil(t, repository1)
+		assert.NotNil(t, repository2)
+
+		assert.NotSame(t, repository1, repository2)
+	})
+}

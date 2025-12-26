@@ -17,8 +17,13 @@ type MercadoPagoConfig struct {
 	ApiBaseURL    string
 }
 
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type MercadoPagoClient struct {
-	cfg *MercadoPagoConfig
+	cfg        *MercadoPagoConfig
+	httpClient HTTPClient
 }
 
 func (c *MercadoPagoClient) GetConfig() *MercadoPagoConfig {
@@ -41,7 +46,17 @@ func NewClient() *MercadoPagoClient {
 		ApiBaseURL:    applicationConfig.MercadoPago.ApiBaseURL,
 	}
 
-	return &MercadoPagoClient{cfg: cfg}
+	return &MercadoPagoClient{
+		cfg:        cfg,
+		httpClient: &http.Client{},
+	}
+}
+
+func NewClientWithHTTPClient(cfg *MercadoPagoConfig, httpClient HTTPClient) *MercadoPagoClient {
+	return &MercadoPagoClient{
+		cfg:        cfg,
+		httpClient: httpClient,
+	}
 }
 
 func (c *MercadoPagoClient) DoRequest(ctx context.Context, method string, path string, requestBody []byte, idempotencyKey string) ([]byte, error) {
@@ -62,9 +77,7 @@ func (c *MercadoPagoClient) DoRequest(ctx context.Context, method string, path s
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.cfg.AccessToken))
 	req.Header.Set("X-Idempotency-Key", idempotencyKey)
 
-	httpClient := &http.Client{}
-
-	resp, err := httpClient.Do(req)
+	resp, err := c.httpClient.Do(req)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute request: %w", err)

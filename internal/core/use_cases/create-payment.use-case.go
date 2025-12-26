@@ -49,15 +49,11 @@ func (uc *CreatePaymentUseCase) Execute(paymentDTO dto.CreatePaymentDTO) (entiti
 			}
 		}
 
-		payment.SetQrCode(pixBillingResult.QRData)
+		err = payment.SetQrCode(pixBillingResult.QRData)
 
-		// err = uc.repository.Update(paymentDTO.Ctx, *payment)
-
-		// if err != nil {
-		// 	return entities.Payment{}, &exceptions.InvalidPaymentDataException{
-		// 		Message: "Failed to update payment with QR data",
-		// 	}
-		// }
+		if err != nil {
+			return entities.Payment{}, &exceptions.InvalidPaymentDataException{}
+		}
 
 		err = uc.repository.Insert(paymentDTO.Ctx, *payment)
 

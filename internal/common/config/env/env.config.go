@@ -11,9 +11,10 @@ import (
 type Config struct {
 	GoEnv string
 	API   struct {
-		Port string
-		Host string
-		URL  string
+		Port       string
+		Host       string
+		URL        string
+		WebhookURL string
 	}
 	Database struct {
 		RunMigrations bool
@@ -73,6 +74,7 @@ func (c *Config) Load() {
 	c.API.Port = getEnv("API_PORT")
 	c.API.Host = getEnv("API_HOST")
 	c.API.URL = c.API.Host + ":" + c.API.Port
+	c.API.WebhookURL = getEnv("WEBHOOK_URL")
 
 	c.Database.RunMigrations = getEnv("DB_RUN_MIGRATIONS") == "true"
 	c.Database.Host = getEnv("DB_HOST")
