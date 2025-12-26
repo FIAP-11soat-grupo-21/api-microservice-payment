@@ -57,7 +57,7 @@ func TestCreate(t *testing.T) {
 		err := service.Create(ctx, orderDTO)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "test.kitchen-order", capturedRoutingKey)
+		assert.Equal(t, "create.kitchen-order", capturedRoutingKey)
 
 		var unmarshaledDTO dto.CreateKitchenOrderDTO
 		err = json.Unmarshal(capturedBody, &unmarshaledDTO)
@@ -126,7 +126,7 @@ func TestCreate(t *testing.T) {
 
 		assert.NoError(t, err)
 		cfg := env.GetConfig()
-		assert.Equal(t, cfg.RabbitMQ.CreateKitchenOrderTopic, capturedRoutingKey)
+		assert.Equal(t, cfg.RabbitMQ.Topics.CreateKitchenOrder, capturedRoutingKey)
 	})
 
 	t.Run("should handle context cancellation", func(t *testing.T) {

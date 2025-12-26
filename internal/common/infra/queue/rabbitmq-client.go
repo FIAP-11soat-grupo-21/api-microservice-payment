@@ -96,3 +96,58 @@ func PublishMessageWithContext(ctx context.Context, routingKey string, body []by
 
 	return err
 }
+
+func RegisterConsumer(queueName, binding string, handler func(amqp.Delivery)) {
+	ch := GetChannel()
+	cfg := env.GetConfig()
+
+	q, err := ch.QueueDeclare(
+		queueName, // name
+		true,      // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		nil,       // arguments
+	)
+
+	if err != nil {
+		log.Panicf("Failed to declare a queue: %v", err)
+	}
+
+	err = ch.QueueBind(
+		q.Name,                // queue name
+		binding,               // routing key
+		cfg.RabbitMQ.Exchange, // exchange
+		false,                 // no-wait
+		nil,                   // args
+	)
+
+	if err != nil {
+		log.Panicf("Failed to bind a queue: %v", err)
+	}
+
+	msgs, err := ch.Consume(
+		queueName, // queue
+		"",        // consumer
+		false,     // auto-ack
+		false,     // exclusive
+		false,     // no-local
+		false,     // no-wait
+		nil,       // args
+	)
+
+	if err != nil {
+		log.Panicf("Failed to register a consumer: %v", err)
+	}
+
+	forever := make(chan struct{})
+
+	go func() {
+		for d := range msgs {
+			handler(d)
+		}
+	}()
+
+	log.Printf(" [*] Waiting for messages in queue: %s. To exit press CTRL+C", queueName)
+	<-forever
+}

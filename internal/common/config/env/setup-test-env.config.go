@@ -25,6 +25,7 @@ func SetupTestEnv(t *testing.T) func() {
 		"RABBITMQ_URL":                        os.Getenv("RABBITMQ_URL"),
 		"RABBITMQ_EXCHANGE":                   os.Getenv("RABBITMQ_EXCHANGE"),
 		"RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC": os.Getenv("RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC"),
+		"RABBITMQ_REFOUND_PAYMENT_TOPIC":      os.Getenv("RABBITMQ_REFOUND_PAYMENT_TOPIC"),
 	}
 
 	// Define valores de teste
@@ -44,7 +45,8 @@ func SetupTestEnv(t *testing.T) func() {
 	os.Setenv("MERCADOPAGO_API_URL", "https://api.test.com")
 	os.Setenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
 	os.Setenv("RABBITMQ_EXCHANGE", "test_exchange")
-	os.Setenv("RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC", "test.kitchen-order")
+	os.Setenv("RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC", "create.kitchen-order")
+	os.Setenv("RABBITMQ_REFOUND_PAYMENT_TOPIC", "refound.payment")
 
 	// Retorna função de cleanup
 	return func() {

@@ -111,6 +111,10 @@ func NewPayment(
 	}, nil
 }
 
+func (p *Payment) IsEmpty() bool {
+	return p.ID == ""
+}
+
 func (p *Payment) MarkAsPaid(transactionCode string) {
 	if p.Status.IsPending() {
 		p.Status.SetPaid()
@@ -123,6 +127,10 @@ func (p *Payment) MarkAsPaid(transactionCode string) {
 
 func (p *Payment) MarkAsFailed() {
 	p.Status.SetFailed()
+}
+
+func (p *Payment) MarkAsRefunded() {
+	p.Status.SetRefunded()
 }
 
 func (p *Payment) SetQrCode(qrCode string) error {

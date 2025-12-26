@@ -8,6 +8,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"payment_microservice/internal/adapters/driver/api/routes"
+	"payment_microservice/internal/adapters/driver/rabbitmq/consumers"
 	"payment_microservice/internal/common/config/env"
 	"payment_microservice/internal/common/infra/api/middlewares"
 	_ "payment_microservice/internal/common/infra/api/swagger"
@@ -30,6 +31,7 @@ func Init() {
 	}
 
 	queue.Connect()
+	consumers.RegisterConsumers()
 
 	ginRouter := gin.Default()
 

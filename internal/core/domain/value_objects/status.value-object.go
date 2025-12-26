@@ -61,3 +61,11 @@ func (s Status) IsFailed() bool {
 func (s *Status) SetFailed() {
 	s.value = constants.PAYMENT_STATUS_FAILED
 }
+
+func (s Status) IsRefunded() bool {
+	return s.value == constants.PAYMENT_STATUS_REFUNDED
+}
+
+func (s *Status) SetRefunded() {
+	s.value = constants.PAYMENT_STATUS_REFUNDED
+}

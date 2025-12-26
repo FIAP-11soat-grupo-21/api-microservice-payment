@@ -44,11 +44,11 @@ func (s *RabbitMQKitchenOrderService) Create(ctx context.Context, dto dto.Create
 
 	cfg := env.GetConfig()
 
-	kitchenOrderQueueName := cfg.RabbitMQ.CreateKitchenOrderTopic
+	routingKey := cfg.RabbitMQ.Topics.CreateKitchenOrder
 
 	return s.publisher.PublishMessageWithContext(
 		ctx,
-		kitchenOrderQueueName,
+		routingKey,
 		dtoJSON,
 	)
 }
