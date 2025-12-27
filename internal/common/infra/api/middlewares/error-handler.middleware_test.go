@@ -26,7 +26,7 @@ func TestErrorHandlerMiddleware(t *testing.T) {
 			err := &exceptions.PaymentNotFoundException{
 				Message: "payment not found",
 			}
-			c.Error(err)
+			_ = c.Error(err)
 		})
 
 		req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -45,7 +45,7 @@ func TestErrorHandlerMiddleware(t *testing.T) {
 			err := &exceptions.InvalidPaymentDataException{
 				Message: "invalid data",
 			}
-			c.Error(err)
+			_ = c.Error(err)
 		})
 
 		req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -62,7 +62,7 @@ func TestErrorHandlerMiddleware(t *testing.T) {
 
 		router.GET("/test", func(c *gin.Context) {
 			err := errors.New("generic error")
-			c.Error(err)
+			_ = c.Error(err)
 		})
 
 		req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -94,9 +94,9 @@ func TestErrorHandlerMiddleware(t *testing.T) {
 		router := setupTestRouter()
 
 		router.GET("/test", func(c *gin.Context) {
-			c.Error(errors.New("first error"))
-			c.Error(errors.New("second error"))
-			c.Error(&exceptions.PaymentNotFoundException{
+			_ = c.Error(errors.New("first error"))
+			_ = c.Error(errors.New("second error"))
+			_ = c.Error(&exceptions.PaymentNotFoundException{
 				Message: "last error",
 			})
 		})
@@ -116,7 +116,7 @@ func TestErrorHandlerMiddleware(t *testing.T) {
 		handlerCalled := false
 		router.GET("/test", func(c *gin.Context) {
 			handlerCalled = true
-			c.Error(errors.New("test error"))
+			_ = c.Error(errors.New("test error"))
 		})
 
 		req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -132,7 +132,7 @@ func TestErrorHandlerMiddleware(t *testing.T) {
 		router := setupTestRouter()
 
 		router.GET("/test", func(c *gin.Context) {
-			c.Error(&exceptions.InvalidPaymentDataException{
+			_ = c.Error(&exceptions.InvalidPaymentDataException{
 				Message: "validation error",
 			})
 		})
@@ -169,7 +169,7 @@ func TestErrorHandlerMiddleware(t *testing.T) {
 		router := setupTestRouter()
 
 		router.GET("/test", func(c *gin.Context) {
-			c.Error(errors.New("database connection failed"))
+			_ = c.Error(errors.New("database connection failed"))
 		})
 
 		req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -188,7 +188,7 @@ func TestErrorHandlerMiddleware(t *testing.T) {
 
 		router.GET("/test", func(c *gin.Context) {
 			executionOrder = append(executionOrder, "handler")
-			c.Error(&exceptions.PaymentNotFoundException{
+			_ = c.Error(&exceptions.PaymentNotFoundException{
 				Message: "not found",
 			})
 		})

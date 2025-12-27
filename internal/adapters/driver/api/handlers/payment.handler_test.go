@@ -80,7 +80,8 @@ func TestCreatePixBilling_Success(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
 
 	assert.NotEmpty(t, response["id"])
 	assert.Equal(t, "order-123", response["order_id"])
@@ -306,7 +307,8 @@ func TestFindByOrderID_Success(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
 
 	assert.Equal(t, "payment-123", response["id"])
 	assert.Equal(t, "order-123", response["order_id"])
@@ -392,7 +394,8 @@ func TestFindByOrderID_WithoutQRCode(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
 
 	assert.Equal(t, "payment-123", response["id"])
 	// qr_code com omitempty não aparece quando nil

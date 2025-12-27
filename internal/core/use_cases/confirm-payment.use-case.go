@@ -33,12 +33,16 @@ func (uc *ConfirmPaymentUseCase) Execute(ctx context.Context, eventDTO dto.Webho
 	if eventDTO.Type == "payment" && eventDTO.Action == "payment.updated" {
 		payment.Status.SetPaid()
 
-		uc.repository.Update(ctx, payment)
+		if err := uc.repository.Update(ctx, payment); err != nil {
+			return err
+		}
 
 		kitchenOrderDTO := dto.CreateKitchenOrderDTO{
 			OrderID: eventDTO.OrderID,
 		}
-		uc.kitchenOrderService.Create(ctx, kitchenOrderDTO)
+		if err := uc.kitchenOrderService.Create(ctx, kitchenOrderDTO); err != nil {
+			return err
+		}
 	}
 
 	return nil

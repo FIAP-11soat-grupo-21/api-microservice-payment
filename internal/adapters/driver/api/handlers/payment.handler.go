@@ -134,7 +134,7 @@ func (h *PaymentHandler) FindByOrderID(ctx *gin.Context) {
 	payment, err := findPaymentUseCase.Execute(ctx, orderID)
 
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 

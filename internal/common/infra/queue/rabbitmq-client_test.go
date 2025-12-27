@@ -60,7 +60,7 @@ func TestPublishMessageWithContext_NilChannel(t *testing.T) {
 
 	// Act & Assert: deve fazer panic ao tentar publicar sem channel (comportamento esperado do código atual)
 	assert.Panics(t, func() {
-		PublishMessageWithContext(ctx, routingKey, body)
+		_ = PublishMessageWithContext(ctx, routingKey, body)
 	}, "PublishMessageWithContext should panic when channel is nil")
 }
 

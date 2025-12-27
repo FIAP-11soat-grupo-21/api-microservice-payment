@@ -49,5 +49,7 @@ func Init() {
 		ctx.JSON(200, gin.H{"status": "healthy"})
 	})
 
-	ginRouter.Run(config.API.URL)
+	if err := ginRouter.Run(config.API.URL); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }

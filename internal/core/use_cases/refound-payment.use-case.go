@@ -8,7 +8,6 @@ import (
 
 type RefoundPaymentUseCase struct {
 	repository ports.IPaymentRepository
-	gateway    ports.IPaymentGateway
 }
 
 func NewRefoundPaymentUseCase(repository ports.IPaymentRepository) *RefoundPaymentUseCase {

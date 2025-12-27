@@ -97,7 +97,14 @@ func Close() {
 }
 
 func RunMigrations() {
-	dbConnection.AutoMigrate(
+	if dbConnection == nil {
+		log.Println("Database connection is not initialized")
+		return
+	}
+
+	if err := dbConnection.AutoMigrate(
 		&repositories.PaymentModel{},
-	)
+	); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
 }
