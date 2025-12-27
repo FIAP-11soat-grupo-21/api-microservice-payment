@@ -100,13 +100,21 @@ func TestRunMigrations(t *testing.T) {
 
 	dbConnection = gormDB
 
-	// Expect migration queries
-	mock.ExpectExec("CREATE TABLE").WillReturnResult(sqlmock.NewResult(1, 1))
+	// Expect migration queries used by GORM AutoMigrate
+	mock.ExpectQuery("SELECT count\\(\\*\\) FROM information_schema.tables").
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectExec("CREATE TABLE").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectExec("CREATE UNIQUE INDEX").
+		WillReturnResult(sqlmock.NewResult(0, 0))
 
-	// Act & Assert: não deve fazer panic
+	// Act: não deve fazer panic
 	assert.NotPanics(t, func() {
 		RunMigrations()
 	})
+
+	// Assert: todas as expectativas de SQL foram atendidas
+	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
 func TestConnect_RetryLogic(t *testing.T) {

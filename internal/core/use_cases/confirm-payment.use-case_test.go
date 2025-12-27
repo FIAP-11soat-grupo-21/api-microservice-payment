@@ -233,7 +233,7 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 		mockKitchenService.AssertExpectations(t)
 	})
 
-	t.Run("should still execute kitchen service even if update fails", func(t *testing.T) {
+	t.Run("should return error when update fails", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
 		mockKitchenService := new(mocks.MockKitchenOrderService)
 		ctx := context.Background()
@@ -260,15 +260,13 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 
 		mockRepo.On("FindByOrderID", ctx, orderID).Return(existingPayment, nil)
 		mockRepo.On("Update", ctx, mock.Anything).Return(errors.New("update failed"))
-		mockKitchenService.On("Create", ctx, dto.CreateKitchenOrderDTO{
-			OrderID: orderID,
-		}).Return(nil)
 
 		useCase := NewConfirmPaymentUseCase(mockRepo, mockKitchenService)
 		err := useCase.Execute(ctx, eventDTO)
 
-		assert.NoError(t, err)
+		assert.Error(t, err)
+		assert.EqualError(t, err, "update failed")
 		mockRepo.AssertExpectations(t)
-		mockKitchenService.AssertExpectations(t)
+		mockKitchenService.AssertNotCalled(t, "Create")
 	})
 }
