@@ -22,15 +22,16 @@ jobs:
       SONAR_ORGANIZATION: "fiap-11soat-grupo-21"
   
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
         
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: '1.25'
-      
+          cache: true
+          
       - name: Install Dependencies
         working-directory: ./
         run: go mod tidy
@@ -41,11 +42,11 @@ jobs:
           go test ./... -coverprofile=coverage.out
       
       - name: Run GolangCI-Lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-          working-directory: ./
-          args: --out-format json > golangci-lint-report.json
+        working-directory: ./
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          golangci-lint run --out-format json > golangci-lint-report.json
 
       - name: Run Gosec Security Scanner
         working-directory: ./
