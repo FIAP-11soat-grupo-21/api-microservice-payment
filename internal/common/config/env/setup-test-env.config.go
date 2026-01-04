@@ -24,8 +24,9 @@ func SetupTestEnv(t *testing.T) func() {
 		"MERCADOPAGO_API_URL":                 os.Getenv("MERCADOPAGO_API_URL"),
 		"RABBITMQ_URL":                        os.Getenv("RABBITMQ_URL"),
 		"RABBITMQ_EXCHANGE":                   os.Getenv("RABBITMQ_EXCHANGE"),
+		"RABBITMQ_CREATE_PAYMENT_TOPIC":       os.Getenv("RABBITMQ_CREATE_PAYMENT_TOPIC"),
 		"RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC": os.Getenv("RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC"),
-		"RABBITMQ_REFOUND_PAYMENT_TOPIC":      os.Getenv("RABBITMQ_REFOUND_PAYMENT_TOPIC"),
+		"RABBITMQ_ORDER_ERROR_TOPIC":          os.Getenv("RABBITMQ_ORDER_ERROR_TOPIC"),
 	}
 
 	// Define valores de teste
@@ -45,8 +46,9 @@ func SetupTestEnv(t *testing.T) func() {
 	os.Setenv("MERCADOPAGO_API_URL", "https://api.test.com")
 	os.Setenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
 	os.Setenv("RABBITMQ_EXCHANGE", "test_exchange")
+	os.Setenv("RABBITMQ_CREATE_PAYMENT_TOPIC", "create.payment")
 	os.Setenv("RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC", "create.kitchen-order")
-	os.Setenv("RABBITMQ_REFOUND_PAYMENT_TOPIC", "refound.payment")
+	os.Setenv("RABBITMQ_ORDER_ERROR_TOPIC", "order-error")
 
 	// Retorna função de cleanup
 	return func() {

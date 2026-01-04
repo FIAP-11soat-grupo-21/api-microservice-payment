@@ -8,5 +8,6 @@ import (
 
 func RegisterConsumers() {
 	cfg := env.GetConfig()
-	go queue.RegisterConsumer("refound-payment", cfg.RabbitMQ.Topics.RefoundPayment, handlers.RefoundPayment)
+	go queue.RegisterConsumer("create-payment", cfg.RabbitMQ.Topics.CreatePayment, handlers.CreatePayment)
+	go queue.RegisterConsumer("payment-order-error", cfg.RabbitMQ.Topics.OrderError, handlers.RollbackPayment)
 }

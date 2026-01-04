@@ -6,17 +6,17 @@ import (
 	"payment_microservice/internal/core/domain/ports"
 )
 
-type RefoundPaymentUseCase struct {
+type RollbackPaymentUseCase struct {
 	repository ports.IPaymentRepository
 }
 
-func NewRefoundPaymentUseCase(repository ports.IPaymentRepository) *RefoundPaymentUseCase {
-	return &RefoundPaymentUseCase{
+func NewRollbackPaymentUseCase(repository ports.IPaymentRepository) *RollbackPaymentUseCase {
+	return &RollbackPaymentUseCase{
 		repository: repository,
 	}
 }
 
-func (uc *RefoundPaymentUseCase) Execute(ctx context.Context, orderID string) error {
+func (uc *RollbackPaymentUseCase) Execute(ctx context.Context, orderID string) error {
 	payment, err := uc.repository.FindByOrderID(ctx, orderID)
 
 	if err != nil {
@@ -27,9 +27,7 @@ func (uc *RefoundPaymentUseCase) Execute(ctx context.Context, orderID string) er
 		return new(exceptions.PaymentNotFoundException)
 	}
 
-	payment.MarkAsRefunded()
-
-	err = uc.repository.Update(ctx, payment)
+	err = uc.repository.Delete(ctx, payment.ID)
 
 	if err != nil {
 		return err

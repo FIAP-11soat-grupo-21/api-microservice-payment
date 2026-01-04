@@ -10,21 +10,20 @@ import (
 	"payment_microservice/internal/core/domain/exceptions"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-func TestNewRefoundPaymentUseCase(t *testing.T) {
+func TestNewRollbackPaymentUseCase(t *testing.T) {
 	repo := new(mocks.MockPaymentRepository)
 
-	uc := NewRefoundPaymentUseCase(repo)
+	uc := NewRollbackPaymentUseCase(repo)
 
 	assert.NotNil(t, uc)
 	assert.Equal(t, repo, uc.repository)
 }
 
-func TestRefoundPaymentUseCase_Execute_FindByOrderIDError(t *testing.T) {
+func TestRollbackPaymentUseCase_Execute_FindByOrderIDError(t *testing.T) {
 	repo := new(mocks.MockPaymentRepository)
-	uc := NewRefoundPaymentUseCase(repo)
+	uc := NewRollbackPaymentUseCase(repo)
 
 	ctx := context.Background()
 	orderID := "order-123"
@@ -41,9 +40,9 @@ func TestRefoundPaymentUseCase_Execute_FindByOrderIDError(t *testing.T) {
 	repo.AssertExpectations(t)
 }
 
-func TestRefoundPaymentUseCase_Execute_PaymentNotFound(t *testing.T) {
+func TestRollbackPaymentUseCase_Execute_PaymentNotFound(t *testing.T) {
 	repo := new(mocks.MockPaymentRepository)
-	uc := NewRefoundPaymentUseCase(repo)
+	uc := NewRollbackPaymentUseCase(repo)
 
 	ctx := context.Background()
 	orderID := "order-123"
@@ -60,9 +59,9 @@ func TestRefoundPaymentUseCase_Execute_PaymentNotFound(t *testing.T) {
 	repo.AssertExpectations(t)
 }
 
-func TestRefoundPaymentUseCase_Execute_Success(t *testing.T) {
+func TestRollbackPaymentUseCase_Execute_Success(t *testing.T) {
 	repo := new(mocks.MockPaymentRepository)
-	uc := NewRefoundPaymentUseCase(repo)
+	uc := NewRollbackPaymentUseCase(repo)
 
 	ctx := context.Background()
 	orderID := "order-123"
@@ -74,10 +73,7 @@ func TestRefoundPaymentUseCase_Execute_Success(t *testing.T) {
 		Return(payment, nil).
 		Once()
 
-	repo.On("Update", ctx, mock.MatchedBy(func(p entities.Payment) bool {
-		// garante que o pagamento passado para Update é o mesmo pedido e foi marcado como refundado
-		return p.OrderID == orderID && p.Status.IsRefunded()
-	})).
+	repo.On("Delete", ctx, payment.ID).
 		Return(nil).
 		Once()
 
@@ -87,22 +83,22 @@ func TestRefoundPaymentUseCase_Execute_Success(t *testing.T) {
 	repo.AssertExpectations(t)
 }
 
-func TestRefoundPaymentUseCase_Execute_UpdateError(t *testing.T) {
+func TestRollbackPaymentUseCase_Execute_UpdateError(t *testing.T) {
 	repo := new(mocks.MockPaymentRepository)
-	uc := NewRefoundPaymentUseCase(repo)
+	uc := NewRollbackPaymentUseCase(repo)
 
 	ctx := context.Background()
 	orderID := "order-123"
 
 	payment := entities.Payment{ID: "payment-1", OrderID: orderID}
 
-	expectedErr := errors.New("update failed")
+	expectedErr := errors.New("delete failed")
 
 	repo.On("FindByOrderID", ctx, orderID).
 		Return(payment, nil).
 		Once()
 
-	repo.On("Update", ctx, mock.AnythingOfType("entities.Payment")).
+	repo.On("Delete", ctx, payment.ID).
 		Return(expectedErr).
 		Once()
 

@@ -34,8 +34,9 @@ type Config struct {
 		URL      string
 		Exchange string
 		Topics   struct {
-			RefoundPayment     string
+			OrderError         string
 			CreateKitchenOrder string
+			CreatePayment      string
 		}
 	}
 }
@@ -93,8 +94,9 @@ func (c *Config) Load() {
 
 	c.RabbitMQ.URL = getEnv("RABBITMQ_URL")
 	c.RabbitMQ.Exchange = getEnv("RABBITMQ_EXCHANGE")
+	c.RabbitMQ.Topics.CreatePayment = getEnv("RABBITMQ_CREATE_PAYMENT_TOPIC")
 	c.RabbitMQ.Topics.CreateKitchenOrder = getEnv("RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC")
-	c.RabbitMQ.Topics.RefoundPayment = getEnv("RABBITMQ_REFOUND_PAYMENT_TOPIC")
+	c.RabbitMQ.Topics.OrderError = getEnv("RABBITMQ_ORDER_ERROR_TOPIC")
 }
 
 func (c *Config) IsProduction() bool {
