@@ -3,7 +3,7 @@ package repositories
 import "time"
 
 type PaymentModel struct {
-	ID              string     `gorm:"column:id;primaryKey"`
+	ID              string     `gorm:"column:id;primaryKey;size:36"`
 	OrderID         string     `gorm:"column:order_id;uniqueIndex;size:36;not null"`
 	Amount          float64    `gorm:"column:amount;not null"`
 	Status          string     `gorm:"column:status;size:50;not null"`

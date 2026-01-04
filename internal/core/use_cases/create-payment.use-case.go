@@ -25,7 +25,7 @@ func (uc *CreatePaymentUseCase) Execute(paymentDTO dto.CreatePaymentDTO) (entiti
 	var qrData *string
 
 	payment, err := entities.NewPaymentDefault(
-		identity_manager.NewUUIDV4(),
+		identity_manager.NewUUIDV7(),
 		paymentDTO.OrderID,
 		paymentDTO.Amount,
 		paymentDTO.Method,

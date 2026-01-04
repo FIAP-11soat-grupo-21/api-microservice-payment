@@ -2,8 +2,9 @@ package identity_manager
 
 import "github.com/google/uuid"
 
-func NewUUIDV4() string {
-	return uuid.New().String()
+func NewUUIDV7() string {
+	id := uuid.Must(uuid.NewV7())
+	return id.String()
 }
 
 func IsValidUUID(uuidStr string) bool {

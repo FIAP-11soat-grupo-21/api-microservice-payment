@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewUUIDV4(t *testing.T) {
-	t.Run("should generate a valid UUID v4 string", func(t *testing.T) {
-		id := NewUUIDV4()
+func TestNewUUIDV7(t *testing.T) {
+	t.Run("should generate a valid UUID v7 string", func(t *testing.T) {
+		id := NewUUIDV7()
 
 		assert.NotEmpty(t, id)
 		_, err := uuid.Parse(id)
@@ -18,9 +18,9 @@ func TestNewUUIDV4(t *testing.T) {
 	})
 
 	t.Run("should return different UUIDs on each call", func(t *testing.T) {
-		id1 := NewUUIDV4()
-		id2 := NewUUIDV4()
-		id3 := NewUUIDV4()
+		id1 := NewUUIDV7()
+		id2 := NewUUIDV7()
+		id3 := NewUUIDV7()
 
 		assert.NotEqual(t, id1, id2)
 		assert.NotEqual(t, id2, id3)
@@ -30,13 +30,13 @@ func TestNewUUIDV4(t *testing.T) {
 	t.Run("should return UUID in standard format", func(t *testing.T) {
 		uuidPattern := regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 
-		id := NewUUIDV4()
+		id := NewUUIDV7()
 
 		assert.True(t, uuidPattern.MatchString(id), "UUID should match standard format")
 	})
 
-	t.Run("should generate UUID v4 (not other versions)", func(t *testing.T) {
-		id := NewUUIDV4()
+	t.Run("should generate UUID v7 (not other versions)", func(t *testing.T) {
+		id := NewUUIDV7()
 
 		parsed, err := uuid.Parse(id)
 		assert.NoError(t, err)
