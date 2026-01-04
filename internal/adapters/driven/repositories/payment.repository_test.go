@@ -56,7 +56,6 @@ func TestGormPaymentDataSource_Insert(t *testing.T) {
 				payment.Amount.Value(),
 				payment.Status.Value(),
 				payment.Method.Value(),
-				payment.TransactionCode,
 				sqlmock.AnyArg(),
 				payment.PaidAt,
 				sqlmock.AnyArg(),
@@ -103,7 +102,6 @@ func TestGormPaymentDataSource_Insert(t *testing.T) {
 			100.00,
 			"pending",
 			"pix",
-			nil,
 			&qrCode,
 			nil,
 			createdAt,
@@ -118,10 +116,9 @@ func TestGormPaymentDataSource_Insert(t *testing.T) {
 				payment.Amount.Value(),
 				payment.Status.Value(),
 				payment.Method.Value(),
-				nil,
-				sqlmock.AnyArg(),
-				nil,
-				sqlmock.AnyArg(),
+				sqlmock.AnyArg(), // qr_code_url
+				nil,              // paid_at
+				sqlmock.AnyArg(), // created_at
 			).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 		mock.ExpectCommit()
@@ -148,7 +145,6 @@ func TestGormPaymentDataSource_Update(t *testing.T) {
 				payment.Amount.Value(),
 				payment.Status.Value(),
 				payment.Method.Value(),
-				payment.TransactionCode,
 				sqlmock.AnyArg(),
 				payment.PaidAt,
 				sqlmock.AnyArg(),
@@ -190,9 +186,7 @@ func TestGormPaymentDataSource_Update(t *testing.T) {
 		dataSource := NewGormPaymentDataSource(gormDB)
 		payment := mocks.GetPendingPaymentEntity()
 
-		transactionCode := "TXN-PAID-123"
-		payment.TransactionCode = &transactionCode
-		payment.MarkAsPaid(transactionCode)
+		payment.MarkAsPaid()
 
 		ctx := context.Background()
 
@@ -203,7 +197,6 @@ func TestGormPaymentDataSource_Update(t *testing.T) {
 				payment.Amount.Value(),
 				"paid",
 				payment.Method.Value(),
-				&transactionCode,
 				sqlmock.AnyArg(),
 				sqlmock.AnyArg(),
 				sqlmock.AnyArg(),
@@ -229,14 +222,13 @@ func TestGormPaymentDataSource_FindByOrderID(t *testing.T) {
 
 		rows := sqlmock.NewRows([]string{
 			"id", "order_id", "amount", "status", "payment_method",
-			"transaction_code", "qr_code_url", "paid_at", "created_at",
+			"qr_code_url", "paid_at", "created_at",
 		}).AddRow(
 			modelData.ID,
 			modelData.OrderID,
 			modelData.Amount,
 			modelData.Status,
 			modelData.PaymentMethod,
-			modelData.TransactionCode,
 			modelData.QRCodeURL,
 			modelData.PaidAt,
 			modelData.CreatedAt,

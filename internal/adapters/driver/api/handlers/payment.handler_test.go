@@ -286,16 +286,14 @@ func TestFindByOrderID_Success(t *testing.T) {
 	method, _ := value_objects.NewMethod(constants.PIX_PAYMENT_METHOD)
 	qrCode, _ := value_objects.NewQRCode("00020101021243650016COM.MERCADOLIBRE")
 
-	transactionCode := "MP123456"
 	payment := entities.Payment{
-		ID:              "payment-123",
-		OrderID:         "order-123",
-		Amount:          amount,
-		Status:          status,
-		Method:          method,
-		TransactionCode: &transactionCode,
-		QRCode:          &qrCode,
-		CreatedAt:       time.Now(),
+		ID:        "payment-123",
+		OrderID:   "order-123",
+		Amount:    amount,
+		Status:    status,
+		Method:    method,
+		QRCode:    &qrCode,
+		CreatedAt: time.Now(),
 	}
 
 	mockRepo.On("FindByOrderID", mock.Anything, "order-123").Return(payment, nil)
@@ -372,17 +370,15 @@ func TestFindByOrderID_WithoutQRCode(t *testing.T) {
 	method, _ := value_objects.NewMethod(constants.PIX_PAYMENT_METHOD)
 	paidAt := time.Now()
 
-	transactionCode := "MP123456"
 	payment := entities.Payment{
-		ID:              "payment-123",
-		OrderID:         "order-123",
-		Amount:          amount,
-		Status:          status,
-		Method:          method,
-		TransactionCode: &transactionCode,
-		QRCode:          nil,
-		CreatedAt:       time.Now(),
-		PaidAt:          &paidAt,
+		ID:        "payment-123",
+		OrderID:   "order-123",
+		Amount:    amount,
+		Status:    status,
+		Method:    method,
+		QRCode:    nil,
+		CreatedAt: time.Now(),
+		PaidAt:    &paidAt,
 	}
 
 	mockRepo.On("FindByOrderID", mock.Anything, "order-123").Return(payment, nil)

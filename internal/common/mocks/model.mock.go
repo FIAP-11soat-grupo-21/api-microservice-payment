@@ -9,7 +9,6 @@ import (
 // GetValidPaymentEntity retorna uma entidade de pagamento válida para testes
 func GetValidPaymentEntity() entities.Payment {
 	qrCode := "00020101021243650016COM.MERCADOLIBRE"
-	transactionCode := "TXN123456"
 	paidAt := time.Now()
 	createdAt := time.Now().Add(-1 * time.Hour)
 
@@ -19,7 +18,6 @@ func GetValidPaymentEntity() entities.Payment {
 		100.50,
 		"pending",
 		"pix",
-		&transactionCode,
 		&qrCode,
 		&paidAt,
 		createdAt,
@@ -43,7 +41,6 @@ func GetPendingPaymentEntity() entities.Payment {
 		250.00,
 		"pending",
 		"pix",
-		nil,
 		&qrCode,
 		nil,
 		createdAt,
@@ -58,33 +55,30 @@ func GetPendingPaymentEntity() entities.Payment {
 
 // PaymentModelData representa os dados para criar um PaymentModel
 type PaymentModelData struct {
-	ID              string
-	OrderID         string
-	Amount          float64
-	Status          string
-	PaymentMethod   string
-	TransactionCode *string
-	QRCodeURL       *string
-	PaidAt          *time.Time
-	CreatedAt       time.Time
+	ID            string
+	OrderID       string
+	Amount        float64
+	Status        string
+	PaymentMethod string
+	QRCodeURL     *string
+	PaidAt        *time.Time
+	CreatedAt     time.Time
 }
 
 // GetPaymentModelData retorna dados de modelo de pagamento
 func GetPaymentModelData() PaymentModelData {
 	qrCode := "00020101021243650016COM.MERCADOLIBRE"
-	transactionCode := "TXN123456"
 	paidAt := time.Now()
 	createdAt := time.Now().Add(-1 * time.Hour)
 
 	return PaymentModelData{
-		ID:              "payment-uuid-123",
-		OrderID:         "order-uuid-456",
-		Amount:          100.50,
-		Status:          "pending",
-		PaymentMethod:   "pix",
-		TransactionCode: &transactionCode,
-		QRCodeURL:       &qrCode,
-		PaidAt:          &paidAt,
-		CreatedAt:       createdAt,
+		ID:            "payment-uuid-123",
+		OrderID:       "order-uuid-456",
+		Amount:        100.50,
+		Status:        "pending",
+		PaymentMethod: "pix",
+		QRCodeURL:     &qrCode,
+		PaidAt:        &paidAt,
+		CreatedAt:     createdAt,
 	}
 }

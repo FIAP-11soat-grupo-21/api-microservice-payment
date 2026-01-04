@@ -44,7 +44,6 @@ func TestNewPaymentDefault(t *testing.T) {
 		assert.Equal(t, method, payment.Method.Value())
 		assert.True(t, payment.Status.IsPending())
 		assert.Nil(t, payment.QRCode)
-		assert.Nil(t, payment.TransactionCode)
 		assert.Nil(t, payment.PaidAt)
 		assert.False(t, payment.CreatedAt.IsZero())
 	})
@@ -157,12 +156,11 @@ func TestNewPayment(t *testing.T) {
 		amount := 100.50
 		status := constants.PAYMENT_STATUS_PAID
 		method := constants.PIX_PAYMENT_METHOD
-		transactionCode := "txn-123"
 		qrCode := "00020126580014br.gov.bcb.pix"
 		now := time.Now()
 		paidAt := now
 
-		payment, err := NewPayment(id, orderID, amount, status, method, &transactionCode, &qrCode, &paidAt, now)
+		payment, err := NewPayment(id, orderID, amount, status, method, &qrCode, &paidAt, now)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, payment)
@@ -171,7 +169,6 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, amount, payment.Amount.Value())
 		assert.Equal(t, status, payment.Status.Value())
 		assert.Equal(t, method, payment.Method.Value())
-		assert.Equal(t, &transactionCode, payment.TransactionCode)
 		assert.NotNil(t, payment.QRCode)
 		assert.Equal(t, qrCode, payment.QRCode.Value())
 		assert.Equal(t, &paidAt, payment.PaidAt)
@@ -186,11 +183,10 @@ func TestNewPayment(t *testing.T) {
 		method := constants.PIX_PAYMENT_METHOD
 		now := time.Now()
 
-		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, nil, now)
+		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, now)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, payment)
-		assert.Nil(t, payment.TransactionCode)
 		assert.Nil(t, payment.QRCode)
 		assert.Nil(t, payment.PaidAt)
 	})
@@ -203,7 +199,7 @@ func TestNewPayment(t *testing.T) {
 		method := "invalid"
 		now := time.Now()
 
-		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, nil, now)
+		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, now)
 
 		assert.Error(t, err)
 		assert.Nil(t, payment)
@@ -218,7 +214,7 @@ func TestNewPayment(t *testing.T) {
 		method := constants.PIX_PAYMENT_METHOD
 		now := time.Now()
 
-		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, nil, now)
+		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, now)
 
 		assert.Error(t, err)
 		assert.Nil(t, payment)
@@ -233,7 +229,7 @@ func TestNewPayment(t *testing.T) {
 		method := constants.PIX_PAYMENT_METHOD
 		now := time.Now()
 
-		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, nil, now)
+		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, now)
 
 		assert.Error(t, err)
 		assert.Nil(t, payment)
@@ -249,7 +245,7 @@ func TestNewPayment(t *testing.T) {
 		qrCode := ""
 		now := time.Now()
 
-		payment, err := NewPayment(id, orderID, amount, status, method, nil, &qrCode, nil, now)
+		payment, err := NewPayment(id, orderID, amount, status, method, &qrCode, nil, now)
 
 		assert.Error(t, err)
 		assert.Nil(t, payment)
@@ -264,7 +260,7 @@ func TestNewPayment(t *testing.T) {
 		method := constants.PIX_PAYMENT_METHOD
 		now := time.Now()
 
-		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, nil, now)
+		payment, err := NewPayment(id, orderID, amount, status, method, nil, nil, now)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, payment)
@@ -281,12 +277,10 @@ func TestPayment_MarkAsPaid(t *testing.T) {
 		var qrData *string
 
 		payment, _ := NewPaymentDefault(id, orderID, amount, method, qrData)
-		transactionCode := "txn-123"
 
-		payment.MarkAsPaid(transactionCode)
+		payment.MarkAsPaid()
 
 		assert.True(t, payment.Status.IsPaid())
-		assert.Equal(t, transactionCode, *payment.TransactionCode)
 		assert.NotNil(t, payment.PaidAt)
 		assert.False(t, payment.PaidAt.IsZero())
 	})
@@ -297,17 +291,14 @@ func TestPayment_MarkAsPaid(t *testing.T) {
 		amount := 100.50
 		status := constants.PAYMENT_STATUS_PAID
 		method := constants.PIX_PAYMENT_METHOD
-		originalTxn := "txn-original"
 		now := time.Now()
 		paidAt := now.Add(-1 * time.Hour)
 
-		payment, _ := NewPayment(id, orderID, amount, status, method, &originalTxn, nil, &paidAt, now)
-		newTransactionCode := "txn-new"
+		payment, _ := NewPayment(id, orderID, amount, status, method, nil, &paidAt, now)
 
-		payment.MarkAsPaid(newTransactionCode)
+		payment.MarkAsPaid()
 
 		assert.True(t, payment.Status.IsPaid())
-		assert.Equal(t, originalTxn, *payment.TransactionCode)
 		assert.Equal(t, paidAt, *payment.PaidAt)
 	})
 
@@ -319,13 +310,11 @@ func TestPayment_MarkAsPaid(t *testing.T) {
 		method := constants.PIX_PAYMENT_METHOD
 		now := time.Now()
 
-		payment, _ := NewPayment(id, orderID, amount, status, method, nil, nil, nil, now)
-		transactionCode := "txn-123"
+		payment, _ := NewPayment(id, orderID, amount, status, method, nil, nil, now)
 
-		payment.MarkAsPaid(transactionCode)
+		payment.MarkAsPaid()
 
 		assert.True(t, payment.Status.IsFailed())
-		assert.Nil(t, payment.TransactionCode)
 		assert.Nil(t, payment.PaidAt)
 	})
 }
@@ -351,11 +340,10 @@ func TestPayment_MarkAsFailed(t *testing.T) {
 		amount := 100.50
 		status := constants.PAYMENT_STATUS_PAID
 		method := constants.PIX_PAYMENT_METHOD
-		transactionCode := "txn-123"
 		now := time.Now()
 		paidAt := now
 
-		payment, _ := NewPayment(id, orderID, amount, status, method, &transactionCode, nil, &paidAt, now)
+		payment, _ := NewPayment(id, orderID, amount, status, method, nil, &paidAt, now)
 
 		payment.MarkAsFailed()
 
@@ -370,7 +358,7 @@ func TestPayment_MarkAsFailed(t *testing.T) {
 		method := constants.PIX_PAYMENT_METHOD
 		now := time.Now()
 
-		payment, _ := NewPayment(id, orderID, amount, status, method, nil, nil, nil, now)
+		payment, _ := NewPayment(id, orderID, amount, status, method, nil, nil, now)
 
 		payment.MarkAsFailed()
 
@@ -436,7 +424,7 @@ func TestPayment_SetQrCode(t *testing.T) {
 		method := constants.PIX_PAYMENT_METHOD
 		now := time.Now()
 
-		payment, _ := NewPayment(id, orderID, amount, status, method, nil, nil, nil, now)
+		payment, _ := NewPayment(id, orderID, amount, status, method, nil, nil, now)
 
 		qrCode := "00020126580014br.gov.bcb.pix"
 		err := payment.SetQrCode(qrCode)

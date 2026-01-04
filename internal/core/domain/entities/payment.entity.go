@@ -8,15 +8,14 @@ import (
 )
 
 type Payment struct {
-	ID              string
-	OrderID         string
-	Amount          value_objects.Amount
-	Status          value_objects.Status
-	Method          value_objects.Method
-	TransactionCode *string
-	QRCode          *value_objects.QRCode
-	CreatedAt       time.Time
-	PaidAt          *time.Time
+	ID        string
+	OrderID   string
+	Amount    value_objects.Amount
+	Status    value_objects.Status
+	Method    value_objects.Method
+	QRCode    *value_objects.QRCode
+	CreatedAt time.Time
+	PaidAt    *time.Time
 }
 
 func NewPaymentDefault(id, orderID string, amount float64, method string, qrData *string) (*Payment, error) {
@@ -69,7 +68,6 @@ func NewPayment(
 	amount float64,
 	status,
 	method string,
-	transactionCode *string,
 	qrCode *string,
 	paidAt *time.Time,
 	createdAt time.Time,
@@ -99,15 +97,14 @@ func NewPayment(
 	}
 
 	return &Payment{
-		ID:              id,
-		OrderID:         orderID,
-		Amount:          paymentAmount,
-		Status:          paymentStatus,
-		Method:          paymentMethod,
-		TransactionCode: transactionCode,
-		QRCode:          paymentQrCode,
-		PaidAt:          paidAt,
-		CreatedAt:       createdAt,
+		ID:        id,
+		OrderID:   orderID,
+		Amount:    paymentAmount,
+		Status:    paymentStatus,
+		Method:    paymentMethod,
+		QRCode:    paymentQrCode,
+		PaidAt:    paidAt,
+		CreatedAt: createdAt,
 	}, nil
 }
 
@@ -115,10 +112,9 @@ func (p *Payment) IsEmpty() bool {
 	return p.ID == ""
 }
 
-func (p *Payment) MarkAsPaid(transactionCode string) {
+func (p *Payment) MarkAsPaid() {
 	if p.Status.IsPending() {
 		p.Status.SetPaid()
-		p.TransactionCode = &transactionCode
 
 		now := time.Now()
 		p.PaidAt = &now

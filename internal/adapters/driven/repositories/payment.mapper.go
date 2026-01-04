@@ -11,7 +11,6 @@ func toDomain(paymentModel PaymentModel) (entities.Payment, error) {
 		paymentModel.Amount,
 		paymentModel.Status,
 		paymentModel.PaymentMethod,
-		paymentModel.TransactionCode,
 		paymentModel.QRCodeURL,
 		paymentModel.PaidAt,
 		paymentModel.CreatedAt,
@@ -33,14 +32,13 @@ func toPersistence(payment entities.Payment) PaymentModel {
 	}
 
 	return PaymentModel{
-		ID:              payment.ID,
-		OrderID:         payment.OrderID,
-		Amount:          payment.Amount.Value(),
-		Status:          payment.Status.Value(),
-		PaymentMethod:   payment.Method.Value(),
-		TransactionCode: payment.TransactionCode,
-		QRCodeURL:       qrCodeURL,
-		PaidAt:          payment.PaidAt,
-		CreatedAt:       payment.CreatedAt,
+		ID:            payment.ID,
+		OrderID:       payment.OrderID,
+		Amount:        payment.Amount.Value(),
+		Status:        payment.Status.Value(),
+		PaymentMethod: payment.Method.Value(),
+		QRCodeURL:     qrCodeURL,
+		PaidAt:        payment.PaidAt,
+		CreatedAt:     payment.CreatedAt,
 	}
 }

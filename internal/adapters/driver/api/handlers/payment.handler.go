@@ -65,15 +65,14 @@ func (ph *PaymentHandler) CreatePixBilling(ctx *gin.Context) {
 	}
 
 	responseBody := schemas.PaymentResponseSchema{
-		ID:              newPayment.ID,
-		OrderID:         newPayment.OrderID,
-		Amount:          newPayment.Amount.Value(),
-		Status:          newPayment.Status.Value(),
-		Method:          newPayment.Method.Value(),
-		TransactionCode: newPayment.TransactionCode,
-		QRCode:          qrCode,
-		CreatedAt:       newPayment.CreatedAt,
-		PaidAt:          newPayment.PaidAt,
+		ID:        newPayment.ID,
+		OrderID:   newPayment.OrderID,
+		Amount:    newPayment.Amount.Value(),
+		Status:    newPayment.Status.Value(),
+		Method:    newPayment.Method.Value(),
+		QRCode:    qrCode,
+		CreatedAt: newPayment.CreatedAt,
+		PaidAt:    newPayment.PaidAt,
 	}
 
 	ctx.JSON(http.StatusCreated, responseBody)
@@ -145,15 +144,14 @@ func (h *PaymentHandler) FindByOrderID(ctx *gin.Context) {
 	}
 
 	responseBody := schemas.PaymentResponseSchema{
-		ID:              payment.ID,
-		OrderID:         payment.OrderID,
-		Amount:          payment.Amount.Value(),
-		Status:          payment.Status.Value(),
-		Method:          payment.Method.Value(),
-		TransactionCode: payment.TransactionCode,
-		QRCode:          qrCode,
-		CreatedAt:       payment.CreatedAt,
-		PaidAt:          payment.PaidAt,
+		ID:        payment.ID,
+		OrderID:   payment.OrderID,
+		Amount:    payment.Amount.Value(),
+		Status:    payment.Status.Value(),
+		Method:    payment.Method.Value(),
+		QRCode:    qrCode,
+		CreatedAt: payment.CreatedAt,
+		PaidAt:    payment.PaidAt,
 	}
 
 	ctx.JSON(http.StatusOK, responseBody)

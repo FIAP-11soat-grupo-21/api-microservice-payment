@@ -18,21 +18,19 @@ func TestToDomain(t *testing.T) {
 		amount := 100.50
 		status := constants.PAYMENT_STATUS_PENDING
 		method := constants.PIX_PAYMENT_METHOD
-		transactionCode := "TXN-789"
 		qrCodeURL := "00020101021243650016COM.MERCADOLIBRE"
 		now := time.Now()
 		paidAt := time.Now().Add(5 * time.Minute)
 
 		paymentModel := PaymentModel{
-			ID:              id,
-			OrderID:         orderID,
-			Amount:          amount,
-			Status:          status,
-			PaymentMethod:   method,
-			TransactionCode: &transactionCode,
-			QRCodeURL:       &qrCodeURL,
-			PaidAt:          &paidAt,
-			CreatedAt:       now,
+			ID:            id,
+			OrderID:       orderID,
+			Amount:        amount,
+			Status:        status,
+			PaymentMethod: method,
+			QRCodeURL:     &qrCodeURL,
+			PaidAt:        &paidAt,
+			CreatedAt:     now,
 		}
 
 		payment, err := toDomain(paymentModel)
@@ -43,8 +41,6 @@ func TestToDomain(t *testing.T) {
 		assert.Equal(t, amount, payment.Amount.Value())
 		assert.Equal(t, status, payment.Status.Value())
 		assert.Equal(t, method, payment.Method.Value())
-		assert.NotNil(t, payment.TransactionCode)
-		assert.Equal(t, transactionCode, *payment.TransactionCode)
 		assert.NotNil(t, payment.QRCode)
 		assert.Equal(t, qrCodeURL, payment.QRCode.Value())
 		assert.NotNil(t, payment.PaidAt)
@@ -61,15 +57,14 @@ func TestToDomain(t *testing.T) {
 		now := time.Now()
 
 		paymentModel := PaymentModel{
-			ID:              id,
-			OrderID:         orderID,
-			Amount:          amount,
-			Status:          status,
-			PaymentMethod:   method,
-			TransactionCode: nil,
-			QRCodeURL:       nil,
-			PaidAt:          nil,
-			CreatedAt:       now,
+			ID:            id,
+			OrderID:       orderID,
+			Amount:        amount,
+			Status:        status,
+			PaymentMethod: method,
+			QRCodeURL:     nil,
+			PaidAt:        nil,
+			CreatedAt:     now,
 		}
 
 		payment, err := toDomain(paymentModel)
@@ -77,7 +72,6 @@ func TestToDomain(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, id, payment.ID)
 		assert.Equal(t, orderID, payment.OrderID)
-		assert.Nil(t, payment.TransactionCode)
 		assert.Nil(t, payment.QRCode)
 		assert.Nil(t, payment.PaidAt)
 	})
@@ -198,7 +192,6 @@ func TestToPersistence(t *testing.T) {
 		amount := 100.50
 		status := constants.PAYMENT_STATUS_PAID
 		method := constants.PIX_PAYMENT_METHOD
-		transactionCode := "TXN-789"
 		qrCodeData := "00020101021243650016COM.MERCADOLIBRE"
 		now := time.Now()
 		paidAt := time.Now().Add(5 * time.Minute)
@@ -209,15 +202,14 @@ func TestToPersistence(t *testing.T) {
 		paymentMethod, _ := value_objects.NewMethod(method)
 
 		payment := entities.Payment{
-			ID:              id,
-			OrderID:         orderID,
-			Amount:          paymentAmount,
-			Status:          paymentStatus,
-			Method:          paymentMethod,
-			TransactionCode: &transactionCode,
-			QRCode:          &qrCode,
-			CreatedAt:       now,
-			PaidAt:          &paidAt,
+			ID:        id,
+			OrderID:   orderID,
+			Amount:    paymentAmount,
+			Status:    paymentStatus,
+			Method:    paymentMethod,
+			QRCode:    &qrCode,
+			CreatedAt: now,
+			PaidAt:    &paidAt,
 		}
 
 		paymentModel := toPersistence(payment)
@@ -227,8 +219,6 @@ func TestToPersistence(t *testing.T) {
 		assert.Equal(t, amount, paymentModel.Amount)
 		assert.Equal(t, status, paymentModel.Status)
 		assert.Equal(t, method, paymentModel.PaymentMethod)
-		assert.NotNil(t, paymentModel.TransactionCode)
-		assert.Equal(t, transactionCode, *paymentModel.TransactionCode)
 		assert.NotNil(t, paymentModel.QRCodeURL)
 		assert.Equal(t, qrCodeData, *paymentModel.QRCodeURL)
 		assert.NotNil(t, paymentModel.PaidAt)
@@ -249,15 +239,14 @@ func TestToPersistence(t *testing.T) {
 		paymentMethod, _ := value_objects.NewMethod(method)
 
 		payment := entities.Payment{
-			ID:              id,
-			OrderID:         orderID,
-			Amount:          paymentAmount,
-			Status:          paymentStatus,
-			Method:          paymentMethod,
-			TransactionCode: nil,
-			QRCode:          nil,
-			CreatedAt:       now,
-			PaidAt:          nil,
+			ID:        id,
+			OrderID:   orderID,
+			Amount:    paymentAmount,
+			Status:    paymentStatus,
+			Method:    paymentMethod,
+			QRCode:    nil,
+			CreatedAt: now,
+			PaidAt:    nil,
 		}
 
 		paymentModel := toPersistence(payment)
@@ -267,39 +256,9 @@ func TestToPersistence(t *testing.T) {
 		assert.Equal(t, amount, paymentModel.Amount)
 		assert.Equal(t, status, paymentModel.Status)
 		assert.Equal(t, method, paymentModel.PaymentMethod)
-		assert.Nil(t, paymentModel.TransactionCode)
 		assert.Nil(t, paymentModel.QRCodeURL)
 		assert.Nil(t, paymentModel.PaidAt)
 		assert.Equal(t, now, paymentModel.CreatedAt)
-	})
-
-	t.Run("should convert Payment entity with nil TransactionCode", func(t *testing.T) {
-		id := "payment-123"
-		orderID := "order-456"
-		amount := 100.50
-		status := constants.PAYMENT_STATUS_PENDING
-		method := constants.PIX_PAYMENT_METHOD
-		now := time.Now()
-
-		paymentAmount, _ := value_objects.NewAmount(amount)
-		paymentStatus, _ := value_objects.NewStatus(status)
-		paymentMethod, _ := value_objects.NewMethod(method)
-
-		payment := entities.Payment{
-			ID:              id,
-			OrderID:         orderID,
-			Amount:          paymentAmount,
-			Status:          paymentStatus,
-			Method:          paymentMethod,
-			TransactionCode: nil,
-			QRCode:          nil,
-			CreatedAt:       now,
-			PaidAt:          nil,
-		}
-
-		paymentModel := toPersistence(payment)
-
-		assert.Nil(t, paymentModel.TransactionCode)
 	})
 
 	t.Run("should convert Payment entity with nil PaidAt", func(t *testing.T) {
