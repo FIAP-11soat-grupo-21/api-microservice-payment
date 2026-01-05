@@ -37,7 +37,6 @@ task_role_policy_arns = [
   "arn:aws:iam::aws:policy/AmazonRDSFullAccess",
   "arn:aws:iam::aws:policy/AmazonSQSFullAccess",
 ]
-alb_is_internal = true
 
 # =======================================================
 # Configurações do API Gateway
