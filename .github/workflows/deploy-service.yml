@@ -137,9 +137,6 @@ jobs:
         with:
           ssh-private-key: ${{ env.GIT_SSH_KEY }}
 
-      - name: Test SSH connection
-        run: ssh -T git@github.com || true
-
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v5.1.0
         with:
