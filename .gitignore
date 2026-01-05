@@ -28,5 +28,10 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+
+# Terraform files
+# values.tfvars  #permitindo as variáveis temporariamente
+/infra/.terraform
+/infra/.terraform.lock.hcl
