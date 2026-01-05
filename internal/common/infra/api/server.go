@@ -30,8 +30,10 @@ func Init() {
 		database.RunMigrations()
 	}
 
-	queue.Connect()
-	consumers.RegisterConsumers()
+	if config.IsDevelopment() {
+		queue.Connect()
+		consumers.RegisterConsumers()
+	}
 
 	ginRouter := gin.Default()
 
