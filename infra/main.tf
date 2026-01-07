@@ -13,7 +13,20 @@ module "payment_api" {
     ecs_desired_count        = var.desired_count
     registry_credentials_arn = data.terraform_remote_state.infra.outputs.ecr_registry_credentials_arn
 
-    ecs_container_environment_variables = var.container_environment_variables
+    ecs_container_environment_variables = merge(
+        var.container_environment_variables
+        , {
+            DB_HOST : data.terraform_remote_state.infra.outputs.rds_address,
+        }
+    )
+
+    ecs_container_secrets = merge(
+        var.container_secrets
+        , {
+            DB_USERNAME : data.terraform_remote_state.infra.outputs.rds_postgres_db_username
+            DB_PASSWORD : data.terraform_remote_state.infra.outputs.rds_secret_arn
+        }
+    )
 
     private_subnet_ids      = data.terraform_remote_state.infra.outputs.private_subnet_id
     task_execution_role_arn = data.terraform_remote_state.infra.outputs.ecs_task_execution_role_arn
@@ -46,6 +59,11 @@ module "GetPaymentAPIRoute" {
             route_key  = "POST /payments/webhook"
             restricted = false
             auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
-        }
-  }
+        },
+        health = {
+            route_key           = "GET /health"
+            restricted          = false
+            auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
+        },
+    }
 }
