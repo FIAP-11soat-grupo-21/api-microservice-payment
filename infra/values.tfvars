@@ -20,12 +20,6 @@ container_environment_variables = {
   MERCADOPAGO_COLLECTOR_ID : "3068451447"
   MERCADOPAGO_EXTERNAL_POS_ID : "tccaixafiapf2"
   MERCADOPAGO_API_URL : "https://api.mercadopago.com"
-
-  RABBITMQ_URL : "amqp://guest:guest@rabbitmq:5672/"
-  RABBITMQ_EXCHANGE : "amq.topic"
-  RABBITMQ_CREATE_PAYMENT_TOPIC : "create.payment"
-  RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC : "create.kitchen-order"
-  RABBITMQ_ORDER_ERROR_TOPIC : "order-error"
 }
 
 container_secrets = {}

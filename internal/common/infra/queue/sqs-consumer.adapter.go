@@ -1,0 +1,168 @@
+package queue
+
+import (
+	"context"
+	"log"
+	"payment_microservice/internal/common/config/env"
+	"payment_microservice/internal/core/domain/ports"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
+)
+
+type SQSConsumer struct {
+	client    *sqs.Client
+	cfg       *env.Config
+	ctx       context.Context
+	cancelFn  context.CancelFunc
+	isRunning bool
+}
+
+func NewSQSConsumer() *SQSConsumer {
+	ctx := context.Background()
+
+	appCfg := env.GetConfig()
+
+	var awsCfg aws.Config
+	var err error
+
+	// Configura um resolver de endpoint customizado, se fornecido (ex.: ElasticMQ)
+	var endpointResolver aws.EndpointResolverWithOptions
+	if appCfg.AWS.SQS.Endpoint != "" {
+		endpointResolver = aws.EndpointResolverWithOptionsFunc(
+			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+				if service == sqs.ServiceID {
+					return aws.Endpoint{
+						URL: appCfg.AWS.SQS.Endpoint,
+					}, nil
+				}
+				return aws.Endpoint{}, &aws.EndpointNotFoundError{}
+			},
+		)
+	}
+
+	if appCfg.AWS.AccessKeyID != "" && appCfg.AWS.SecretAccessKey != "" {
+		// Usa credenciais explícitas se fornecidas
+		if endpointResolver != nil {
+			awsCfg, err = config.LoadDefaultConfig(ctx,
+				config.WithRegion(appCfg.AWS.Region),
+				config.WithEndpointResolverWithOptions(endpointResolver),
+				config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+					appCfg.AWS.AccessKeyID,
+					appCfg.AWS.SecretAccessKey,
+					"",
+				)),
+			)
+		} else {
+			awsCfg, err = config.LoadDefaultConfig(ctx,
+				config.WithRegion(appCfg.AWS.Region),
+				config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+					appCfg.AWS.AccessKeyID,
+					appCfg.AWS.SecretAccessKey,
+					"",
+				)),
+			)
+		}
+	} else {
+		// Usa credenciais padrão (IAM role, environment variables, etc)
+		if endpointResolver != nil {
+			awsCfg, err = config.LoadDefaultConfig(ctx,
+				config.WithRegion(appCfg.AWS.Region),
+				config.WithEndpointResolverWithOptions(endpointResolver),
+			)
+		} else {
+			awsCfg, err = config.LoadDefaultConfig(ctx,
+				config.WithRegion(appCfg.AWS.Region),
+			)
+		}
+	}
+
+	if err != nil {
+		log.Fatalf("unable to load AWS SDK config, %v", err)
+		return nil
+	}
+
+	client := sqs.NewFromConfig(awsCfg)
+	consumerCtx, cancel := context.WithCancel(ctx)
+
+	return &SQSConsumer{
+		client:    client,
+		cfg:       appCfg,
+		ctx:       consumerCtx,
+		cancelFn:  cancel,
+		isRunning: false,
+	}
+}
+
+func (c *SQSConsumer) ConsumeQueue(queueURL string, handler ports.MessageHandler) error {
+	if c.isRunning {
+		log.Printf("Consumer already running for queue: %s", queueURL)
+		return nil
+	}
+
+	c.isRunning = true
+	log.Printf(" [*] Starting to consume messages from SQS queue: %s", queueURL)
+
+	go c.pollMessages(queueURL, handler)
+
+	return nil
+}
+
+func (c *SQSConsumer) pollMessages(queueURL string, handler ports.MessageHandler) {
+	for {
+		select {
+		case <-c.ctx.Done():
+			log.Printf("Stopping consumer for queue: %s", queueURL)
+			c.isRunning = false
+			return
+		default:
+			result, err := c.client.ReceiveMessage(c.ctx, &sqs.ReceiveMessageInput{
+				QueueUrl:            aws.String(queueURL),
+				MaxNumberOfMessages: 10,
+				WaitTimeSeconds:     20, // Long polling
+				VisibilityTimeout:   30,
+			})
+
+			if err != nil {
+				log.Printf("Error receiving messages from SQS: %v", err)
+				time.Sleep(5 * time.Second)
+				continue
+			}
+
+			for _, message := range result.Messages {
+				err = c.processMessage(queueURL, message, handler)
+				if err != nil {
+					log.Printf("Error processing message ID %s: %v", *message.MessageId, err)
+				}
+			}
+		}
+	}
+}
+
+func (c *SQSConsumer) processMessage(queueURL string, message types.Message, handler ports.MessageHandler) error {
+	if message.Body == nil {
+		log.Printf("Received message with nil body")
+		return nil
+	}
+
+	err := handler([]byte(*message.Body))
+
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.DeleteMessage(c.ctx, &sqs.DeleteMessageInput{
+		QueueUrl:      aws.String(queueURL),
+		ReceiptHandle: message.ReceiptHandle,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -3,26 +3,24 @@ package handlers
 import (
 	"context"
 	"log"
-	"payment_microservice/internal/adapters/driver/rabbitmq/message"
+	"payment_microservice/internal/adapters/driver/queue/message"
 	"payment_microservice/internal/common/config/constants"
 	"payment_microservice/internal/core/dto"
 	"payment_microservice/internal/core/factory"
 	"payment_microservice/internal/core/use_cases"
-
-	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func CreatePayment(d amqp.Delivery) {
+func CreatePayment(msgBody []byte) error {
 	paymentRepository := factory.NewPaymentRepository()
 	paymentGateway := factory.NewPaymentGateway()
 
 	createPaymentUseCase := use_cases.NewCreatePaymentUseCase(paymentRepository, paymentGateway)
 
-	messageParsed, err := message.NewCreatePaymentMessageFromJSON(d.Body)
+	messageParsed, err := message.NewCreatePaymentMessageFromJSON(msgBody)
 
 	if err != nil {
 		log.Printf("Error parsing message: %v", err)
-		return
+		return err
 	}
 
 	ctx := context.Background()
@@ -36,29 +34,23 @@ func CreatePayment(d amqp.Delivery) {
 
 	if err != nil {
 		log.Printf("Error executing create payment use case: %v", err)
-		return
+		return err
 	}
 
 	log.Printf("Payment created successfully for order ID: %s", messageParsed.OrderID)
-	err = d.Ack(false)
-
-	if err != nil {
-		log.Printf("Error acknowledging message: %v", err)
-		return
-	}
-
+	return nil
 }
 
-func RollbackPayment(d amqp.Delivery) {
+func RollbackPayment(msgBody []byte) error {
 	paymentRepository := factory.NewPaymentRepository()
 
 	rollbackPaymentUseCase := use_cases.NewRollbackPaymentUseCase(paymentRepository)
 
-	messageParsed, err := message.NewRollbackPaymentMessageFromJSON(d.Body)
+	messageParsed, err := message.NewRollbackPaymentMessageFromJSON(msgBody)
 
 	if err != nil {
 		log.Printf("Error parsing message: %v", err)
-		return
+		return err
 	}
 
 	ctx := context.Background()
@@ -67,14 +59,9 @@ func RollbackPayment(d amqp.Delivery) {
 
 	if err != nil {
 		log.Printf("Error executing rollback payment use case: %v", err)
-		return
+		return err
 	}
 
 	log.Printf("Payment rolled back successfully for order ID: %s", messageParsed.OrderID)
-	err = d.Ack(false)
-
-	if err != nil {
-		log.Printf("Error acknowledging message: %v", err)
-		return
-	}
+	return nil
 }

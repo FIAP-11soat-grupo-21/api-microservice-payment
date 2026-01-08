@@ -6,5 +6,6 @@ import (
 )
 
 func NewKitchenOrderService() ports.IKitchenOrderService {
-	return kitchen_order_service.NewRabbitMQKitchenOrderService()
+	queuePublisher := NewQueuePublisher()
+	return kitchen_order_service.NewSQSKitchenOrderService(queuePublisher)
 }

@@ -30,13 +30,17 @@ type Config struct {
 		ExternalPosID string
 		ApiBaseURL    string
 	}
-	RabbitMQ struct {
-		URL      string
-		Exchange string
-		Topics   struct {
-			OrderError         string
-			CreateKitchenOrder string
-			CreatePayment      string
+	AWS struct {
+		Region          string
+		AccessKeyID     string
+		SecretAccessKey string
+		SQS             struct {
+			Endpoint string
+			Queues   struct {
+				OrderError         string
+				CreateKitchenOrder string
+				CreatePayment      string
+			}
 		}
 	}
 }
@@ -92,11 +96,13 @@ func (c *Config) Load() {
 	c.MercadoPago.ExternalPosID = getEnv("MERCADOPAGO_EXTERNAL_POS_ID")
 	c.MercadoPago.ApiBaseURL = getEnv("MERCADOPAGO_API_URL")
 
-	c.RabbitMQ.URL = getEnv("RABBITMQ_URL")
-	c.RabbitMQ.Exchange = getEnv("RABBITMQ_EXCHANGE")
-	c.RabbitMQ.Topics.CreatePayment = getEnv("RABBITMQ_CREATE_PAYMENT_TOPIC")
-	c.RabbitMQ.Topics.CreateKitchenOrder = getEnv("RABBITMQ_CREATE_KITCHEN_ORDER_TOPIC")
-	c.RabbitMQ.Topics.OrderError = getEnv("RABBITMQ_ORDER_ERROR_TOPIC")
+	c.AWS.Region = os.Getenv("AWS_REGION")
+	c.AWS.AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
+	c.AWS.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+	c.AWS.SQS.Endpoint = os.Getenv("AWS_SQS_ENDPOINT")
+	c.AWS.SQS.Queues.CreatePayment = os.Getenv("AWS_SQS_CREATE_PAYMENT_QUEUE")
+	c.AWS.SQS.Queues.CreateKitchenOrder = os.Getenv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE")
+	c.AWS.SQS.Queues.OrderError = os.Getenv("AWS_SQS_ORDER_ERROR_QUEUE")
 }
 
 func (c *Config) IsProduction() bool {

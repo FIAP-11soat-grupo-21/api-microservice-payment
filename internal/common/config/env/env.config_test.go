@@ -44,9 +44,6 @@ func TestConfig_Load(t *testing.T) {
 		assert.Equal(t, "1234567890", config.MercadoPago.CollectorID)
 		assert.Equal(t, "test_pos_id", config.MercadoPago.ExternalPosID)
 		assert.Equal(t, "https://api.test.com", config.MercadoPago.ApiBaseURL)
-		assert.Equal(t, "amqp://guest:guest@localhost:5672/", config.RabbitMQ.URL)
-		assert.Equal(t, "test_exchange", config.RabbitMQ.Exchange)
-		assert.Equal(t, "create.kitchen-order", config.RabbitMQ.Topics.CreateKitchenOrder)
 	})
 
 	t.Run("should set RunMigrations to true when DB_RUN_MIGRATIONS is true", func(t *testing.T) {

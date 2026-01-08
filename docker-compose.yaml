@@ -9,15 +9,18 @@ services:
       - postgres:/var/lib/postgresql/data
     networks:
       - backbone
-  rabbitmq:
-    image: rabbitmq:3.8-management
+
+  elasticmq:
+    image: softwaremill/elasticmq-native:1.5.7
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "9324:9324"   # API SQS
+      - "9325:9325"   # UI
     volumes:
-      - rabbitmq:/var/lib/rabbitmq
+      - ./.docker/elasticmq/elasticmq.conf:/opt/elasticmq.conf
+    command: ["-Dconfig.file=/opt/elasticmq.conf"]
     networks:
       - backbone
+
   api:
     build: 
       context: .
@@ -26,6 +29,7 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+      - elasticmq
     env_file:
       - .env
     volumes:
@@ -35,7 +39,6 @@ services:
 
 volumes:
   postgres:
-  rabbitmq:
 
 networks:
   backbone:
