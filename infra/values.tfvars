@@ -26,8 +26,7 @@ container_secrets = {}
 health_check_path = "/health"
 task_role_policy_arns = [
   "arn:aws:iam::aws:policy/AmazonRDSFullAccess",
-  "arn:aws:iam::aws:policy/AmazonSQSFullAccess",
-  "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+  "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
 ]
 
 # =======================================================
@@ -40,13 +39,3 @@ apigw_payload_format_version = "1.0"
 apigw_connection_type        = "VPC_LINK"
 
 authorization_name = "CognitoAuthorizer"
-
-# =======================================================
-# Configurações do RDS
-# =======================================================
-# TODO
-
-# =======================================================
-# Configurações do SQS
-# =======================================================
-# TODO

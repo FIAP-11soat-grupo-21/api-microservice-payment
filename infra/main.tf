@@ -17,13 +17,13 @@ module "payment_api" {
         var.container_environment_variables
         , {
             DB_HOST : data.terraform_remote_state.infra.outputs.rds_address,
+            DB_USERNAME : data.terraform_remote_state.infra.outputs.rds_postgres_db_username
         }
     )
 
     ecs_container_secrets = merge(
         var.container_secrets
         , {
-            DB_USERNAME : data.terraform_remote_state.infra.outputs.rds_postgres_db_username
             DB_PASSWORD : data.terraform_remote_state.infra.outputs.rds_secret_arn
         }
     )
@@ -58,11 +58,6 @@ module "GetPaymentAPIRoute" {
         webhook_notification = {
             route_key  = "POST /payments/webhook"
             restricted = false
-            auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
-        },
-        health = {
-            route_key           = "GET /health"
-            restricted          = false
             auth_integration_id = data.terraform_remote_state.auth.outputs.auth_id
         },
     }
