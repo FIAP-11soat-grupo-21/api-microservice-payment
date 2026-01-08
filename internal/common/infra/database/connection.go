@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"payment_microservice/internal/adapters/driven/repositories"
@@ -33,6 +34,10 @@ func Connect() {
 	}
 
 	config := env.GetConfig()
+
+	if err := ensureDatabaseExists(config); err != nil {
+		log.Fatalf("Failed to ensure database exists: %v", err)
+	}
 
 	dsn := "host=" + config.Database.Host +
 		" user=" + config.Database.Username +
@@ -79,6 +84,51 @@ func Connect() {
 	}
 
 	dbConnection = db
+}
+
+func ensureDatabaseExists(config *env.Config) error {
+	adminDBName := "postgres" // banco padrão de administração no PostgreSQL
+
+	adminDSN := "host=" + config.Database.Host +
+		" user=" + config.Database.Username +
+		" dbname=" + adminDBName +
+		" password=" + config.Database.Password +
+		" port=" + config.Database.Port
+
+	adminDB, err := gorm.Open(postgres.Open(adminDSN), &gorm.Config{})
+	if err != nil {
+		return fmt.Errorf("could not connect to admin database (%s): %w", adminDBName, err)
+	}
+
+	sqlDB, err := adminDB.DB()
+	if err != nil {
+		return fmt.Errorf("could not get admin database handle: %w", err)
+	}
+	defer sqlDB.Close()
+
+	targetDB := config.Database.Name
+	if targetDB == "" {
+		return fmt.Errorf("target database name is empty")
+	}
+
+	var count int64
+	if err := adminDB.
+		Raw("SELECT COUNT(*) FROM pg_database WHERE datname = ?", targetDB).
+		Scan(&count).Error; err != nil {
+		return fmt.Errorf("failed to check if database exists: %w", err)
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	createStmt := fmt.Sprintf("CREATE DATABASE \"%s\"", targetDB)
+	if err := adminDB.Exec(createStmt).Error; err != nil {
+		return fmt.Errorf("failed to create database %s: %w", targetDB, err)
+	}
+
+	log.Printf("Database %s created successfully", targetDB)
+	return nil
 }
 
 func Close() {
