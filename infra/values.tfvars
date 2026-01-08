@@ -7,26 +7,26 @@ app_path_pattern = ["/payments*"]
 # Configurações do ECS Service
 # =======================================================
 container_environment_variables = {
-  GO_ENV : "production"
-  API_PORT : "8088"
-  API_HOST : "0.0.0.0"
-  WEBHOOK_URL : "https://tech-challenge.com.br/v1/payments/webhook"
+    GO_ENV : "production"
+    API_PORT : "8088"
+    API_HOST : "0.0.0.0"
+    WEBHOOK_URL : "https://tech-challenge.com.br/v1/payments/webhook"
 
-  DB_RUN_MIGRATIONS : "true"
-  DB_NAME : "payment_db"
-  DB_PORT : "5432"
+    DB_RUN_MIGRATIONS : "true"
+    DB_NAME : "payment_db"
+    DB_PORT : "5432"
 
-  MERCADOPAGO_ACCESS_TOKEN : "APP_USR-1759552174955251-121514-0add78ff150666b46a342875686de7a7-3068451447"
-  MERCADOPAGO_COLLECTOR_ID : "3068451447"
-  MERCADOPAGO_EXTERNAL_POS_ID : "tccaixafiapf2"
-  MERCADOPAGO_API_URL : "https://api.mercadopago.com"
+    MERCADOPAGO_ACCESS_TOKEN : "APP_USR-1759552174955251-121514-0add78ff150666b46a342875686de7a7-3068451447"
+    MERCADOPAGO_COLLECTOR_ID : "3068451447"
+    MERCADOPAGO_EXTERNAL_POS_ID : "tccaixafiapf2"
+    MERCADOPAGO_API_URL : "https://api.mercadopago.com"
 }
 
 container_secrets = {}
 health_check_path = "/health"
 task_role_policy_arns = [
-  "arn:aws:iam::aws:policy/AmazonRDSFullAccess",
-  "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+    "arn:aws:iam::aws:policy/AmazonRDSFullAccess",
+    "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
 ]
 
 # =======================================================
