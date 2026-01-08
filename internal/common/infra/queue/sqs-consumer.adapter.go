@@ -14,12 +14,30 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
 
+type sqsAPI interface {
+	ReceiveMessage(ctx context.Context, params *sqs.ReceiveMessageInput, optFns ...func(*sqs.Options)) (*sqs.ReceiveMessageOutput, error)
+	DeleteMessage(ctx context.Context, params *sqs.DeleteMessageInput, optFns ...func(*sqs.Options)) (*sqs.DeleteMessageOutput, error)
+}
+
+var sqsConsumerSleep = time.Sleep
+
 type SQSConsumer struct {
-	client    *sqs.Client
+	client    sqsAPI
 	cfg       *env.Config
 	ctx       context.Context
 	cancelFn  context.CancelFunc
 	isRunning bool
+}
+
+func newSQSEndpointResolver(endpoint string) aws.EndpointResolverWithOptions {
+	return aws.EndpointResolverWithOptionsFunc(
+		func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+			if service == sqs.ServiceID {
+				return aws.Endpoint{URL: endpoint}, nil
+			}
+			return aws.Endpoint{}, &aws.EndpointNotFoundError{}
+		},
+	)
 }
 
 func NewSQSConsumer() *SQSConsumer {
@@ -33,22 +51,13 @@ func NewSQSConsumer() *SQSConsumer {
 	// Configura um resolver de endpoint customizado, se fornecido (ex.: ElasticMQ)
 	var endpointResolver aws.EndpointResolverWithOptions
 	if appCfg.AWS.SQS.Endpoint != "" {
-		endpointResolver = aws.EndpointResolverWithOptionsFunc(
-			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-				if service == sqs.ServiceID {
-					return aws.Endpoint{
-						URL: appCfg.AWS.SQS.Endpoint,
-					}, nil
-				}
-				return aws.Endpoint{}, &aws.EndpointNotFoundError{}
-			},
-		)
+		endpointResolver = newSQSEndpointResolver(appCfg.AWS.SQS.Endpoint)
 	}
 
 	if appCfg.AWS.AccessKeyID != "" && appCfg.AWS.SecretAccessKey != "" {
 		// Usa credenciais explícitas se fornecidas
 		if endpointResolver != nil {
-			awsCfg, err = config.LoadDefaultConfig(ctx,
+			awsCfg, err = loadAWSConfig(ctx,
 				config.WithRegion(appCfg.AWS.Region),
 				config.WithEndpointResolverWithOptions(endpointResolver),
 				config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
@@ -58,7 +67,7 @@ func NewSQSConsumer() *SQSConsumer {
 				)),
 			)
 		} else {
-			awsCfg, err = config.LoadDefaultConfig(ctx,
+			awsCfg, err = loadAWSConfig(ctx,
 				config.WithRegion(appCfg.AWS.Region),
 				config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 					appCfg.AWS.AccessKeyID,
@@ -70,19 +79,19 @@ func NewSQSConsumer() *SQSConsumer {
 	} else {
 		// Usa credenciais padrão (IAM role, environment variables, etc)
 		if endpointResolver != nil {
-			awsCfg, err = config.LoadDefaultConfig(ctx,
+			awsCfg, err = loadAWSConfig(ctx,
 				config.WithRegion(appCfg.AWS.Region),
 				config.WithEndpointResolverWithOptions(endpointResolver),
 			)
 		} else {
-			awsCfg, err = config.LoadDefaultConfig(ctx,
+			awsCfg, err = loadAWSConfig(ctx,
 				config.WithRegion(appCfg.AWS.Region),
 			)
 		}
 	}
 
 	if err != nil {
-		log.Fatalf("unable to load AWS SDK config, %v", err)
+		queueLogFatalf("unable to load AWS SDK config, %v", err)
 		return nil
 	}
 
@@ -129,7 +138,7 @@ func (c *SQSConsumer) pollMessages(queueURL string, handler ports.MessageHandler
 
 			if err != nil {
 				log.Printf("Error receiving messages from SQS: %v", err)
-				time.Sleep(5 * time.Second)
+				sqsConsumerSleep(5 * time.Second)
 				continue
 			}
 

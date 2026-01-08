@@ -2,6 +2,7 @@ package factory
 
 import (
 	"payment_microservice/internal/common/config/env"
+	"payment_microservice/internal/core/domain/ports"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,7 +22,7 @@ func TestNewPaymentGateway(t *testing.T) {
 		gateway := NewPaymentGateway()
 
 		assert.NotNil(t, gateway)
-		assert.Implements(t, (*interface{})(nil), gateway)
+		assert.Implements(t, (*ports.IPaymentGateway)(nil), gateway)
 	})
 
 	t.Run("should create new instance on each call", func(t *testing.T) {

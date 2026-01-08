@@ -12,10 +12,29 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 )
 
+type sqsPublisherClient interface {
+	SendMessage(ctx context.Context, params *sqs.SendMessageInput, optFns ...func(*sqs.Options)) (*sqs.SendMessageOutput, error)
+}
+
+type snsPublisherClient interface {
+	Publish(ctx context.Context, params *sns.PublishInput, optFns ...func(*sns.Options)) (*sns.PublishOutput, error)
+}
+
 type SQSPublisher struct {
-	sqsClient *sqs.Client
-	snsClient *sns.Client
+	sqsClient sqsPublisherClient
+	snsClient snsPublisherClient
 	cfg       *env.Config
+}
+
+func newSQSPublisherEndpointResolver(endpoint string) aws.EndpointResolverWithOptions {
+	return aws.EndpointResolverWithOptionsFunc(
+		func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+			if service == sqs.ServiceID || service == sns.ServiceID {
+				return aws.Endpoint{URL: endpoint}, nil
+			}
+			return aws.Endpoint{}, &aws.EndpointNotFoundError{}
+		},
+	)
 }
 
 func NewSQSPublisher() *SQSPublisher {
@@ -29,22 +48,13 @@ func NewSQSPublisher() *SQSPublisher {
 	// Configura um resolver de endpoint customizado, se fornecido (ex.: ElasticMQ)
 	var endpointResolver aws.EndpointResolverWithOptions
 	if appCfg.AWS.SQS.Endpoint != "" {
-		endpointResolver = aws.EndpointResolverWithOptionsFunc(
-			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-				if service == sqs.ServiceID || service == sns.ServiceID {
-					return aws.Endpoint{
-						URL: appCfg.AWS.SQS.Endpoint,
-					}, nil
-				}
-				return aws.Endpoint{}, &aws.EndpointNotFoundError{}
-			},
-		)
+		endpointResolver = newSQSPublisherEndpointResolver(appCfg.AWS.SQS.Endpoint)
 	}
 
 	if appCfg.AWS.AccessKeyID != "" && appCfg.AWS.SecretAccessKey != "" {
 		// Usa credenciais explícitas se fornecidas
 		if endpointResolver != nil {
-			awsCfg, err = config.LoadDefaultConfig(ctx,
+			awsCfg, err = loadAWSConfig(ctx,
 				config.WithRegion(appCfg.AWS.Region),
 				config.WithEndpointResolverWithOptions(endpointResolver),
 				config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
@@ -54,7 +64,7 @@ func NewSQSPublisher() *SQSPublisher {
 				)),
 			)
 		} else {
-			awsCfg, err = config.LoadDefaultConfig(ctx,
+			awsCfg, err = loadAWSConfig(ctx,
 				config.WithRegion(appCfg.AWS.Region),
 				config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 					appCfg.AWS.AccessKeyID,
@@ -66,19 +76,19 @@ func NewSQSPublisher() *SQSPublisher {
 	} else {
 		// Usa credenciais padrão (IAM role, environment variables, etc)
 		if endpointResolver != nil {
-			awsCfg, err = config.LoadDefaultConfig(ctx,
+			awsCfg, err = loadAWSConfig(ctx,
 				config.WithRegion(appCfg.AWS.Region),
 				config.WithEndpointResolverWithOptions(endpointResolver),
 			)
 		} else {
-			awsCfg, err = config.LoadDefaultConfig(ctx,
+			awsCfg, err = loadAWSConfig(ctx,
 				config.WithRegion(appCfg.AWS.Region),
 			)
 		}
 	}
 
 	if err != nil {
-		log.Fatalf("Failed to load AWS config: %v", err)
+		queueLogFatalf("Failed to load AWS config: %v", err)
 		return nil
 	}
 

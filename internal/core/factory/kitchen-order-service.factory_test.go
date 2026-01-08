@@ -2,6 +2,7 @@ package factory
 
 import (
 	"payment_microservice/internal/common/config/env"
+	"payment_microservice/internal/core/domain/ports"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,7 +22,7 @@ func TestNewKitchenOrderService(t *testing.T) {
 		service := NewKitchenOrderService()
 
 		assert.NotNil(t, service)
-		assert.Implements(t, (*interface{})(nil), service)
+		assert.Implements(t, (*ports.IKitchenOrderService)(nil), service)
 	})
 
 	t.Run("should create new instance on each call", func(t *testing.T) {
