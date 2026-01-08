@@ -7,6 +7,10 @@ import (
 	"payment_microservice/internal/core/domain/ports"
 )
 
+var paymentConsumerLogFatalf = func(format string, v ...interface{}) {
+	log.Fatalf(format, v...)
+}
+
 type PaymentConsumer struct {
 	consumer ports.IQueueConsumer
 }
@@ -23,13 +27,13 @@ func (pc *PaymentConsumer) RegisterConsumers() {
 	err := pc.consumer.ConsumeQueue(cfg.AWS.SQS.Queues.CreatePayment, handlers.CreatePayment)
 
 	if err != nil {
-		log.Fatalf("Failed to register create payment consumer: %v", err)
+		paymentConsumerLogFatalf("Failed to register create payment consumer: %v", err)
 	}
 
 	err = pc.consumer.ConsumeQueue(cfg.AWS.SQS.Queues.OrderError, handlers.RollbackPayment)
 
 	if err != nil {
-		log.Fatalf("Failed to register rollback payment consumer: %v", err)
+		paymentConsumerLogFatalf("Failed to register rollback payment consumer: %v", err)
 	}
 
 	log.Println("All queue consumers registered successfully")
