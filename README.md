@@ -114,6 +114,8 @@ internal/
 | **Flexibilidade tecnológica**    | Permite trocar implementações (ex.: mudar de PostgreSQL para MySQL, ou SQS para RabbitMQ) sem alterar as regras de negócio.               |
 | **Manutenibilidade**             | Código organizado em camadas bem definidas facilita a evolução e onboarding de novos desenvolvedores.                                     |
 | **Alinhamento com DDD**          | Combina naturalmente com Domain-Driven Design, mantendo o foco no domínio e nas regras de negócio.                                        |
+| **Diversidade de portas**          | O projeto lida com diversos modelo de entra e saída de dados: HTTP, Banco de dados, Filas e Payment Providers e futuramente terá suporte a GRPC.                                        |
+
 
 ### Fluxo de uma Requisição
 
