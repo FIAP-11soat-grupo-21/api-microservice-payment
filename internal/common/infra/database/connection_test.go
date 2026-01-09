@@ -1,11 +1,13 @@
 package database
 
 import (
+	"database/sql"
 	"payment_microservice/internal/common/config/env"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -132,4 +134,85 @@ func TestConnect_RetryLogic(t *testing.T) {
 	// Para testar retry logic, precisaríamos de uma interface injetável
 	// Por enquanto, apenas documentamos que o código tem retry logic
 	assert.NotNil(t, &dbConnection)
+}
+
+func stubGormOpenWithSQLMock(t *testing.T, sqlDB *sql.DB) {
+	original := gormOpenFn
+	gormOpenFn = func(dialector gorm.Dialector, config *gorm.Config) (*gorm.DB, error) {
+		cfg := config
+		if cfg == nil {
+			cfg = &gorm.Config{}
+		}
+		return gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), cfg)
+	}
+	t.Cleanup(func() {
+		gormOpenFn = original
+	})
+}
+
+func TestEnsureDatabaseExists_WhenAlreadyExists(t *testing.T) {
+	config := &env.Config{}
+	config.Database.Name = "payments_test"
+	config.Database.Host = "localhost"
+	config.Database.Username = "user"
+	config.Database.Password = "pass"
+	config.Database.Port = "5432"
+
+	mockDB, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	defer mockDB.Close()
+
+	stubGormOpenWithSQLMock(t, mockDB)
+
+	mock.ExpectQuery(`SELECT COUNT\(\*\) FROM pg_database WHERE datname = \$1`).
+		WithArgs(config.Database.Name).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+
+	err = ensureDatabaseExists(config)
+	require.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestEnsureDatabaseExists_WhenCreatesDatabase(t *testing.T) {
+	config := &env.Config{}
+	config.Database.Name = "payments_new"
+	config.Database.Host = "localhost"
+	config.Database.Username = "user"
+	config.Database.Password = "pass"
+	config.Database.Port = "5432"
+
+	mockDB, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	defer mockDB.Close()
+
+	stubGormOpenWithSQLMock(t, mockDB)
+
+	mock.ExpectQuery(`SELECT COUNT\(\*\) FROM pg_database WHERE datname = \$1`).
+		WithArgs(config.Database.Name).
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectExec(`CREATE DATABASE "payments_new"`).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	err = ensureDatabaseExists(config)
+	require.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestEnsureDatabaseExists_WhenNameEmpty(t *testing.T) {
+	config := &env.Config{}
+	config.Database.Name = ""
+	config.Database.Host = "localhost"
+	config.Database.Username = "user"
+	config.Database.Password = "pass"
+	config.Database.Port = "5432"
+
+	mockDB, _, err := sqlmock.New()
+	require.NoError(t, err)
+	defer mockDB.Close()
+
+	stubGormOpenWithSQLMock(t, mockDB)
+
+	err = ensureDatabaseExists(config)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "target database name is empty")
 }

@@ -53,8 +53,6 @@ Microserviço responsável pelo processamento de pagamentos, integrando-se com o
 |------------------------|---------------------------------------------------------------------------|
 | `make swagger`         | Gera/atualiza a documentação Swagger em `internal/common/infra/api/swagger` |
 | `make test`            | Executa todos os testes unitários do projeto                              |
-| `make test-coverage`   | Executa testes com cobertura e exibe o percentual total                   |
-| `make test-coverage-html` | Gera relatório HTML de cobertura (`coverage.html`)                     |
 
 ---
 

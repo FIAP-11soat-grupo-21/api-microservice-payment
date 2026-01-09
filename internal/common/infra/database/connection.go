@@ -18,6 +18,9 @@ var (
 	dbConnection *gorm.DB
 	instance     *gorm.DB
 	once         sync.Once
+	gormOpenFn   func(dialector gorm.Dialector, config *gorm.Config) (*gorm.DB, error) = func(dialector gorm.Dialector, config *gorm.Config) (*gorm.DB, error) {
+		return gorm.Open(dialector, config)
+	}
 )
 
 func GetDB() *gorm.DB {
@@ -67,7 +70,7 @@ func Connect() {
 	retryInterval := 2 * time.Second
 
 	for i := range maxRetries {
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+		db, err = gormOpenFn(postgres.Open(dsn), &gorm.Config{
 			Logger: queryLogger,
 		})
 
@@ -95,7 +98,7 @@ func ensureDatabaseExists(config *env.Config) error {
 		" password=" + config.Database.Password +
 		" port=" + config.Database.Port
 
-	adminDB, err := gorm.Open(postgres.Open(adminDSN), &gorm.Config{})
+	adminDB, err := gormOpenFn(postgres.Open(adminDSN), &gorm.Config{})
 	if err != nil {
 		return fmt.Errorf("could not connect to admin database (%s): %w", adminDBName, err)
 	}
