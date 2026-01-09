@@ -18,9 +18,9 @@ module "payment_api" {
     , {
       DB_HOST : data.terraform_remote_state.infra.outputs.rds_address,
       DB_USERNAME : data.terraform_remote_state.infra.outputs.rds_postgres_db_username,
-      AWS_SQS_CREATE_PAYMENT_QUEUE : try(data.terraform_remote_state.sqs_payments.outputs.sqs_queue_url, ""),
-      AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE : try(data.terraform_remote_state.sqs_kitchen_orders.outputs.sqs_queue_url, ""),
-      AWS_SQS_ORDER_ERROR_QUEUE : try(data.terraform_remote_state.sqs_orders.outputs.sqs_queue_url, "")
+      AWS_SQS_CREATE_PAYMENT_QUEUE : data.terraform_remote_state.infra.outputs.sqs_payments_queue_url,
+      AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE : data.terraform_remote_state.infra.outputs.sqs_kitchen_orders_queue_url,
+      AWS_SQS_ORDER_ERROR_QUEUE : data.terraform_remote_state.infra.outputs.sqs_payments_order_error_queue_url
     }
   )
 
