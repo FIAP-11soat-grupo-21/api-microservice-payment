@@ -33,23 +33,19 @@ jobs:
           cache: true
           
       - name: Install Dependencies
-        working-directory: ./
         run: go mod tidy
 
       - name: Run Tests and Generate Coverage
-        working-directory: ./
         run: |
           go test ./... -coverprofile=coverage.out
       
       - name: Run GolangCI-Lint
-        working-directory: ./
         run: |
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
           golangci-lint run --out-format json > golangci-lint-report.json
 
       - name: Run Gosec Security Scanner
-        working-directory: ./
         run: |
           go install github.com/securego/gosec/v2/cmd/gosec@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
@@ -60,13 +56,12 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          projectBaseDir: ./
           args: >
             -Dsonar.verbose=true
             -Dsonar.go.coverage.reportPaths=coverage.out
             -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
-            -Dsonar.coverage.exclusions="**/*_test.go,**/*mock*.go,**/mocks/**"
+            -Dsonar.coverage.exclusions="**/*_test.go,**/*mock*.go,**/mocks/**,**/bdd/**"
   
   RunTests:
     name: Run Unit Tests
@@ -82,7 +77,6 @@ jobs:
           go-version: '1.25'
 
       - name: Execute unit tests
-        working-directory: ./
         run: |
           go test ./... -v 
 
