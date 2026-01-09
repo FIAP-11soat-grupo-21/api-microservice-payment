@@ -21,7 +21,7 @@ module "payment_api" {
       AWS_SQS_CREATE_PAYMENT_QUEUE : data.terraform_remote_state.infra.outputs.sqs_payments_queue_url,
       AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE : data.terraform_remote_state.infra.outputs.sqs_kitchen_orders_queue_url,
       AWS_SQS_ORDER_ERROR_QUEUE : data.terraform_remote_state.infra.outputs.sqs_payments_order_error_queue_url,
-      AWS_SNS_ORDER_ERROR_TOPIC: "order-error-topic"
+      AWS_SNS_ORDER_ERROR_TOPIC : "order-error-topic"
     }
   )
 
