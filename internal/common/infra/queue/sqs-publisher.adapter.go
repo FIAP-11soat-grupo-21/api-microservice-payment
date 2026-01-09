@@ -30,18 +30,22 @@ func NewSQSPublisher() *SQSPublisher {
 	ctx := context.Background()
 	appCfg := env.GetConfig()
 
-	awsCfg, err := loadAWSConfig(
-		ctx,
+	optFns := []func(*config.LoadOptions) error{
 		config.WithRegion(appCfg.AWS.Region),
-		config.WithCredentialsProvider(
+		config.WithBaseEndpoint(appCfg.AWS.Endpoint),
+	}
+
+	if appCfg.AWS.AccessKeyID != "" && appCfg.AWS.SecretAccessKey != "" {
+		optFns = append(optFns, config.WithCredentialsProvider(
 			credentials.NewStaticCredentialsProvider(
 				appCfg.AWS.AccessKeyID,
 				appCfg.AWS.SecretAccessKey,
 				"",
 			),
-		),
-		config.WithBaseEndpoint(appCfg.AWS.Endpoint),
-	)
+		))
+	}
+
+	awsCfg, err := loadAWSConfig(ctx, optFns...)
 
 	if err != nil {
 		queueLogFatalf("Failed to load AWS config: %v", err)

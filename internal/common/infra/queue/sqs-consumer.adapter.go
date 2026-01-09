@@ -33,18 +33,22 @@ func NewSQSConsumer() *SQSConsumer {
 	ctx := context.Background()
 	appCfg := env.GetConfig()
 
-	awsCfg, err := loadAWSConfig(
-		ctx,
+	optFns := []func(*config.LoadOptions) error{
 		config.WithRegion(appCfg.AWS.Region),
-		config.WithCredentialsProvider(
+		config.WithBaseEndpoint(appCfg.AWS.Endpoint),
+	}
+
+	if appCfg.AWS.AccessKeyID != "" && appCfg.AWS.SecretAccessKey != "" {
+		optFns = append(optFns, config.WithCredentialsProvider(
 			credentials.NewStaticCredentialsProvider(
 				appCfg.AWS.AccessKeyID,
 				appCfg.AWS.SecretAccessKey,
 				"",
 			),
-		),
-		config.WithBaseEndpoint(appCfg.AWS.Endpoint),
-	)
+		))
+	}
+
+	awsCfg, err := loadAWSConfig(ctx, optFns...)
 
 	if err != nil {
 		queueLogFatalf("unable to load AWS SDK config, %v", err)
@@ -94,6 +98,7 @@ func (c *SQSConsumer) pollMessages(queueURL string, handler ports.MessageHandler
 			})
 
 			if err != nil {
+				log.Println("QueueURL ->", queueURL)
 				log.Printf("Error receiving messages from SQS: %v", err)
 				sqsConsumerSleep(5 * time.Second)
 				continue
