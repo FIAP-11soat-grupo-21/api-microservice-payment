@@ -1,6 +1,6 @@
 output "payment_queue_url" {
   description = "URL do Payment API no ALB"
-  value       = data.terraform_remote_state.infra.outputs.sqs_payments_queue_url 
+  value       = data.terraform_remote_state.infra.outputs.sqs_payments_queue_url
 }
 
 output "kitchen_order_queue_url" {
