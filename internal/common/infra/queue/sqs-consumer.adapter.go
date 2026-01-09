@@ -98,7 +98,6 @@ func (c *SQSConsumer) pollMessages(queueURL string, handler ports.MessageHandler
 			})
 
 			if err != nil {
-				log.Println("QueueURL ->", queueURL)
 				log.Printf("Error receiving messages from SQS: %v", err)
 				sqsConsumerSleep(5 * time.Second)
 				continue
