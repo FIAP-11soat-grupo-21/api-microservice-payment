@@ -166,7 +166,7 @@ jobs:
             echo "This is a workflow_dispatch event. Performing a terraform plan first."
             terraform apply -var-file=values.tfvars -auto-approve
           else
-            terraform apply -var-file=values.tfvars -auto-approve -target=module.ecs_service
+            terraform apply -var-file=values.tfvars -auto-approve
           fi
 
       - name: Done
