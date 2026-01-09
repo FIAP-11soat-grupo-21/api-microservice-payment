@@ -31,15 +31,20 @@ type Config struct {
 		ApiBaseURL    string
 	}
 	AWS struct {
+		Endpoint        string
 		Region          string
 		AccessKeyID     string
 		SecretAccessKey string
 		SQS             struct {
-			Endpoint string
-			Queues   struct {
+			Queues struct {
 				OrderError         string
 				CreateKitchenOrder string
 				CreatePayment      string
+			}
+		}
+		SNS struct {
+			Topics struct {
+				OrderError string
 			}
 		}
 	}
@@ -79,11 +84,13 @@ func (c *Config) Load() {
 
 	c.GoEnv = getEnv("GO_ENV")
 
+	// API
 	c.API.Port = getEnv("API_PORT")
 	c.API.Host = getEnv("API_HOST")
 	c.API.URL = c.API.Host + ":" + c.API.Port
 	c.API.WebhookURL = getEnv("WEBHOOK_URL")
 
+	// Database
 	c.Database.RunMigrations = getEnv("DB_RUN_MIGRATIONS") == "true"
 	c.Database.Host = getEnv("DB_HOST")
 	c.Database.Name = getEnv("DB_NAME")
@@ -91,18 +98,25 @@ func (c *Config) Load() {
 	c.Database.Username = getEnv("DB_USERNAME")
 	c.Database.Password = getEnv("DB_PASSWORD")
 
+	// Mercado Pago API
 	c.MercadoPago.AccessToken = getEnv("MERCADOPAGO_ACCESS_TOKEN")
 	c.MercadoPago.CollectorID = getEnv("MERCADOPAGO_COLLECTOR_ID")
 	c.MercadoPago.ExternalPosID = getEnv("MERCADOPAGO_EXTERNAL_POS_ID")
 	c.MercadoPago.ApiBaseURL = getEnv("MERCADOPAGO_API_URL")
 
-	c.AWS.Region = os.Getenv("AWS_REGION")
-	c.AWS.AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
-	c.AWS.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
-	c.AWS.SQS.Endpoint = os.Getenv("AWS_SQS_ENDPOINT")
-	c.AWS.SQS.Queues.CreatePayment = os.Getenv("AWS_SQS_CREATE_PAYMENT_QUEUE")
-	c.AWS.SQS.Queues.CreateKitchenOrder = os.Getenv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE")
-	c.AWS.SQS.Queues.OrderError = os.Getenv("AWS_SQS_ORDER_ERROR_QUEUE")
+	// AWS
+	c.AWS.Region = getEnv("AWS_REGION")
+	c.AWS.Endpoint = os.Getenv("AWS_ENDPOINT") // Optional
+	c.AWS.AccessKeyID = getEnv("AWS_ACCESS_KEY_ID")
+	c.AWS.SecretAccessKey = getEnv("AWS_SECRET_ACCESS_KEY")
+
+	// SQS
+	c.AWS.SQS.Queues.CreatePayment = getEnv("AWS_SQS_CREATE_PAYMENT_QUEUE")
+	c.AWS.SQS.Queues.CreateKitchenOrder = getEnv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE")
+	c.AWS.SQS.Queues.OrderError = getEnv("AWS_SQS_ORDER_ERROR_QUEUE")
+
+	// SNS
+	c.AWS.SNS.Topics.OrderError = getEnv("AWS_SNS_ORDER_ERROR_TOPIC")
 }
 
 func (c *Config) IsProduction() bool {

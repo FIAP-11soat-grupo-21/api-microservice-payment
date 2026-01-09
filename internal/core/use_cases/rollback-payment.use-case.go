@@ -2,7 +2,6 @@ package use_cases
 
 import (
 	"context"
-	"payment_microservice/internal/core/domain/exceptions"
 	"payment_microservice/internal/core/domain/ports"
 )
 
@@ -24,7 +23,8 @@ func (uc *RollbackPaymentUseCase) Execute(ctx context.Context, orderID string) e
 	}
 
 	if payment.IsEmpty() {
-		return new(exceptions.PaymentNotFoundException)
+		// No payment found, nothing to rollback
+		return nil
 	}
 
 	err = uc.repository.Delete(ctx, payment.ID)

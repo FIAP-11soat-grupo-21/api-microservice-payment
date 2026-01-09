@@ -5,15 +5,41 @@ import (
 	"log"
 	"payment_microservice/internal/adapters/driver/queue/message"
 	"payment_microservice/internal/common/config/constants"
+	"payment_microservice/internal/common/config/env"
 	"payment_microservice/internal/core/dto"
 	"payment_microservice/internal/core/factory"
 	"payment_microservice/internal/core/use_cases"
 )
 
+func sendRollbackEvent(ctx context.Context, orderID string) {
+	queuePublisher := factory.NewQueuePublisher()
+
+	cfg := env.GetConfig()
+	topic := cfg.AWS.SNS.Topics.OrderError
+
+	messagePayload := message.RollbackPaymentMessage{
+		OrderID:         orderID,
+		SystemTriggered: constants.PAYMENT_SYSTEM_NAME,
+	}
+
+	messageJSON, err := messagePayload.ToJSON()
+
+	if err != nil {
+		log.Printf("Error marshalling rollback event message: %v", err)
+		return
+	}
+
+	log.Println("Sending rollback event to Create Order SAGA")
+	err = queuePublisher.PublishOnTopic(ctx, topic, messageJSON)
+
+	if err != nil {
+		log.Printf("Error publishing rollback event to SNS topic %s: %v", topic, err)
+	}
+}
+
 func CreatePayment(msgBody []byte) error {
 	paymentRepository := factory.NewPaymentRepository()
 	paymentGateway := factory.NewPaymentGateway()
-
 	createPaymentUseCase := use_cases.NewCreatePaymentUseCase(paymentRepository, paymentGateway)
 
 	messageParsed, err := message.NewCreatePaymentMessageFromJSON(msgBody)
@@ -34,6 +60,7 @@ func CreatePayment(msgBody []byte) error {
 
 	if err != nil {
 		log.Printf("Error executing create payment use case: %v", err)
+		sendRollbackEvent(ctx, messageParsed.OrderID)
 		return err
 	}
 
@@ -51,6 +78,11 @@ func RollbackPayment(msgBody []byte) error {
 	if err != nil {
 		log.Printf("Error parsing message: %v", err)
 		return err
+	}
+
+	if messageParsed.SystemTriggered == constants.PAYMENT_SYSTEM_NAME {
+		// Ignore rollback messages triggered by the payment system itself
+		return nil
 	}
 
 	ctx := context.Background()

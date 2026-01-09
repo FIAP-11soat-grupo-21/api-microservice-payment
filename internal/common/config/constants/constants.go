@@ -1,6 +1,8 @@
 package constants
 
 const (
+	PAYMENT_SYSTEM_NAME = "payment_service"
+
 	PIX_PAYMENT_METHOD = "pix"
 
 	PAYMENT_STATUS_PENDING  = "pending"

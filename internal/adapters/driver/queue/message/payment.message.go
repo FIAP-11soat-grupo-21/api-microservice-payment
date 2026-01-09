@@ -20,7 +20,8 @@ func NewCreatePaymentMessageFromJSON(messageJSON []byte) (*CreatePaymentMessage,
 }
 
 type RollbackPaymentMessage struct {
-	OrderID string `json:"order_id"`
+	OrderID         string `json:"order_id"`
+	SystemTriggered string `json:"system_triggered"`
 }
 
 func NewRollbackPaymentMessageFromJSON(messageJSON []byte) (*RollbackPaymentMessage, error) {
@@ -33,4 +34,8 @@ func NewRollbackPaymentMessageFromJSON(messageJSON []byte) (*RollbackPaymentMess
 	}
 
 	return &msg, nil
+}
+
+func (m *RollbackPaymentMessage) ToJSON() ([]byte, error) {
+	return json.Marshal(m)
 }

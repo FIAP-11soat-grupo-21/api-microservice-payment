@@ -68,7 +68,7 @@ func TestNewSQSPublisher_WithDifferentAWSConfigs(t *testing.T) {
 	cfg := env.GetConfig()
 
 	t.Run("with endpoint and explicit credentials", func(t *testing.T) {
-		cfg.AWS.SQS.Endpoint = "http://localhost:9324"
+		cfg.AWS.Endpoint = "http://localhost:9324"
 		cfg.AWS.AccessKeyID = "access-key"
 		cfg.AWS.SecretAccessKey = "secret-key"
 
@@ -77,7 +77,7 @@ func TestNewSQSPublisher_WithDifferentAWSConfigs(t *testing.T) {
 	})
 
 	t.Run("with endpoint and without explicit credentials", func(t *testing.T) {
-		cfg.AWS.SQS.Endpoint = "http://localhost:9324"
+		cfg.AWS.Endpoint = "http://localhost:9324"
 		cfg.AWS.AccessKeyID = ""
 		cfg.AWS.SecretAccessKey = ""
 
@@ -86,7 +86,7 @@ func TestNewSQSPublisher_WithDifferentAWSConfigs(t *testing.T) {
 	})
 
 	t.Run("without endpoint and without explicit credentials", func(t *testing.T) {
-		cfg.AWS.SQS.Endpoint = ""
+		cfg.AWS.Endpoint = ""
 		cfg.AWS.AccessKeyID = ""
 		cfg.AWS.SecretAccessKey = ""
 
@@ -189,19 +189,4 @@ func TestPublishOnTopic_Error(t *testing.T) {
 
 	assert.ErrorIs(t, err, expectedErr)
 	assert.Equal(t, 1, mockSNS.calls)
-}
-
-func TestNewSQSPublisherEndpointResolver(t *testing.T) {
-	resolver := newSQSPublisherEndpointResolver("http://localhost:9324")
-
-	endpoint, err := resolver.ResolveEndpoint(sqs.ServiceID, "us-east-1")
-	assert.NoError(t, err)
-	assert.Equal(t, "http://localhost:9324", endpoint.URL)
-
-	endpoint, err = resolver.ResolveEndpoint(sns.ServiceID, "us-east-1")
-	assert.NoError(t, err)
-	assert.Equal(t, "http://localhost:9324", endpoint.URL)
-
-	_, err = resolver.ResolveEndpoint("lambda", "us-east-1")
-	assert.Error(t, err)
 }

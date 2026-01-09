@@ -14,6 +14,6 @@ RUN go build -buildvcs=false -o main.exe .
 FROM alpine:latest as runtime
 
 COPY --from=builder src/main.exe .
-COPY /scripts/load_env.sh .
+COPY /.docker/config/load_env.sh .
 
 ENTRYPOINT [ "./main.exe" ]

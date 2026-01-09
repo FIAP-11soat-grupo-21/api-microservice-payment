@@ -50,3 +50,20 @@ func TestNewRollbackPaymentMessageFromJSON(t *testing.T) {
 		t.Fatalf("expected nil message for invalid payload")
 	}
 }
+
+func TestRollbackPaymentMessage_ToJSON(t *testing.T) {
+	msg := &RollbackPaymentMessage{
+		OrderID:         "ABC",
+		SystemTriggered: "TestSystem",
+	}
+
+	jsonData, err := msg.ToJSON()
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	expectedJSON := `{"order_id":"ABC","system_triggered":"TestSystem"}`
+	if string(jsonData) != expectedJSON {
+		t.Errorf("expected JSON %s, got %s", expectedJSON, string(jsonData))
+	}
+}

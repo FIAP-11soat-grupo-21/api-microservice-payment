@@ -32,7 +32,7 @@ Microserviço responsável pelo processamento de pagamentos, integrando-se com o
 
    Isso irá iniciar:
    - **PostgreSQL** na porta `5432`
-   - **ElasticMQ** (emulador SQS local) nas portas `9324` (API) e `9325` (UI)
+   - **LocalStack** (emulador SQS e SNS local) nas portas `4566`
    - **API** na porta `8080`
 
 4. **Acesse a API:**
@@ -63,7 +63,7 @@ Microserviço responsável pelo processamento de pagamentos, integrando-se com o
 | **Go (Golang)**  | Linguagem de alta performance, compilada, com excelente suporte a concorrência. Ideal para microserviços que exigem baixa latência e alto throughput.   |
 | **PostgreSQL**   | Banco de dados relacional robusto, open-source, com suporte a transações ACID. Garante consistência e integridade dos dados de pagamento.               |
 | **Mercado Pago API** | Gateway de pagamentos amplamente utilizado no Brasil, oferecendo integração via QR Code dinâmico para pagamentos Pix, facilitando a experiência do usuário. |
-| **Amazon SQS (ElasticMQ local)** | Serviço de filas gerenciado que desacopla a comunicação entre microserviços, garantindo resiliência e processamento assíncrono de eventos (criação de pagamento, rollback, etc.). |
+| **Amazon SQS (LocalStack em dev)** | Serviço de filas gerenciado que desacopla a comunicação entre microserviços, garantindo resiliência e processamento assíncrono de eventos (criação de pagamento, rollback, etc.). |
 | **Gin**          | Framework HTTP minimalista e performático para Go, facilitando a criação de APIs REST com middlewares e roteamento eficiente.                           |
 | **GORM**         | ORM para Go que simplifica operações com banco de dados, oferecendo migrations automáticas e abstração de queries.                                       |
 | **Swagger (swag)** | Geração automática de documentação OpenAPI a partir de anotações no código, facilitando testes e integração por consumidores da API.                   |
