@@ -105,18 +105,18 @@ func (c *Config) Load() {
 	c.MercadoPago.ApiBaseURL = getEnv("MERCADOPAGO_API_URL")
 
 	// AWS
-	c.AWS.Region = os.Getenv("AWS_REGION")
-	c.AWS.Endpoint = os.Getenv("AWS_ENDPOINT")
-	c.AWS.AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
-	c.AWS.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+	c.AWS.Region = getEnv("AWS_REGION")
+	c.AWS.Endpoint = os.Getenv("AWS_ENDPOINT") // Optional
+	c.AWS.AccessKeyID = getEnv("AWS_ACCESS_KEY_ID")
+	c.AWS.SecretAccessKey = getEnv("AWS_SECRET_ACCESS_KEY")
 
 	// SQS
-	c.AWS.SQS.Queues.CreatePayment = os.Getenv("AWS_SQS_CREATE_PAYMENT_QUEUE")
-	c.AWS.SQS.Queues.CreateKitchenOrder = os.Getenv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE")
-	c.AWS.SQS.Queues.OrderError = os.Getenv("AWS_SQS_ORDER_ERROR_QUEUE")
+	c.AWS.SQS.Queues.CreatePayment = getEnv("AWS_SQS_CREATE_PAYMENT_QUEUE")
+	c.AWS.SQS.Queues.CreateKitchenOrder = getEnv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE")
+	c.AWS.SQS.Queues.OrderError = getEnv("AWS_SQS_ORDER_ERROR_QUEUE")
 
 	// SNS
-	c.AWS.SNS.Topics.OrderError = os.Getenv("AWS_SNS_ORDER_ERROR_TOPIC")
+	c.AWS.SNS.Topics.OrderError = getEnv("AWS_SNS_ORDER_ERROR_TOPIC")
 }
 
 func (c *Config) IsProduction() bool {

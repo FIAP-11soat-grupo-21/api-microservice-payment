@@ -28,6 +28,7 @@ func SetupTestEnv(t *testing.T) func() {
 		"AWS_SQS_CREATE_PAYMENT_QUEUE":       os.Getenv("AWS_SQS_CREATE_PAYMENT_QUEUE"),
 		"AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE": os.Getenv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE"),
 		"AWS_SQS_ORDER_ERROR_QUEUE":          os.Getenv("AWS_SQS_ORDER_ERROR_QUEUE"),
+		"AWS_SNS_ORDER_ERROR_TOPIC":          os.Getenv("AWS_SNS_ORDER_ERROR_TOPIC"),
 	}
 
 	// Define valores de teste
@@ -45,12 +46,13 @@ func SetupTestEnv(t *testing.T) func() {
 	os.Setenv("MERCADOPAGO_COLLECTOR_ID", "1234567890")
 	os.Setenv("MERCADOPAGO_EXTERNAL_POS_ID", "test_pos_id")
 	os.Setenv("MERCADOPAGO_API_URL", "https://api.test.com")
-	os.Setenv("AWS_REGION", "us-east-1")
+	os.Setenv("AWS_REGION", "us-east-2")
 	os.Setenv("AWS_ACCESS_KEY_ID", "test_access_key_id")
 	os.Setenv("AWS_SECRET_ACCESS_KEY", "test_secret_access_key")
 	os.Setenv("AWS_SQS_CREATE_PAYMENT_QUEUE", "test_create_payment_queue")
 	os.Setenv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE", "test_create_kitchen_order_queue")
 	os.Setenv("AWS_SQS_ORDER_ERROR_QUEUE", "test_order_error_queue")
+	os.Setenv("AWS_SNS_ORDER_ERROR_TOPIC", "test_order_error_topic")
 
 	// Retorna função de cleanup
 	return func() {

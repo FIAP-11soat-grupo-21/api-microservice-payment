@@ -33,7 +33,7 @@ func NewSQSConsumer() *SQSConsumer {
 	ctx := context.Background()
 	appCfg := env.GetConfig()
 
-	awsCfg, err := config.LoadDefaultConfig(
+	awsCfg, err := loadAWSConfig(
 		ctx,
 		config.WithRegion(appCfg.AWS.Region),
 		config.WithCredentialsProvider(

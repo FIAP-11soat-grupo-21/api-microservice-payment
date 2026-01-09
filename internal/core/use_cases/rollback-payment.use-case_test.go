@@ -7,7 +7,6 @@ import (
 
 	"payment_microservice/internal/common/mocks"
 	"payment_microservice/internal/core/domain/entities"
-	"payment_microservice/internal/core/domain/exceptions"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -55,8 +54,8 @@ func TestRollbackPaymentUseCase_Execute_PaymentNotFound(t *testing.T) {
 
 	err := uc.Execute(ctx, orderID)
 
-	assert.IsType(t, &exceptions.PaymentNotFoundException{}, err)
-	repo.AssertExpectations(t)
+	// Deve retornar sem erro, pois não há pagamento para reverter
+	assert.NoError(t, err)
 }
 
 func TestRollbackPaymentUseCase_Execute_Success(t *testing.T) {
