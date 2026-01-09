@@ -106,9 +106,9 @@ func (c *Config) Load() {
 
 	// AWS
 	c.AWS.Region = getEnv("AWS_REGION")
-	c.AWS.Endpoint = os.Getenv("AWS_ENDPOINT") // Optional
-	c.AWS.AccessKeyID = getEnv("AWS_ACCESS_KEY_ID")
-	c.AWS.SecretAccessKey = getEnv("AWS_SECRET_ACCESS_KEY")
+	c.AWS.Endpoint = os.Getenv("AWS_ENDPOINT")                 // Optional
+	c.AWS.AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")         // Optional
+	c.AWS.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY") // Optional
 
 	// SQS
 	c.AWS.SQS.Queues.CreatePayment = getEnv("AWS_SQS_CREATE_PAYMENT_QUEUE")
