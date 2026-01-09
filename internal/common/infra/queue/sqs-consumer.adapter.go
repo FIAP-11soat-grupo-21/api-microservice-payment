@@ -29,66 +29,22 @@ type SQSConsumer struct {
 	isRunning bool
 }
 
-func newSQSEndpointResolver(endpoint string) aws.EndpointResolverWithOptions {
-	return aws.EndpointResolverWithOptionsFunc(
-		func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-			if service == sqs.ServiceID {
-				return aws.Endpoint{URL: endpoint}, nil
-			}
-			return aws.Endpoint{}, &aws.EndpointNotFoundError{}
-		},
-	)
-}
-
 func NewSQSConsumer() *SQSConsumer {
 	ctx := context.Background()
-
 	appCfg := env.GetConfig()
 
-	var awsCfg aws.Config
-	var err error
-
-	// Configura um resolver de endpoint customizado, se fornecido (ex.: ElasticMQ)
-	var endpointResolver aws.EndpointResolverWithOptions
-	if appCfg.AWS.SQS.Endpoint != "" {
-		endpointResolver = newSQSEndpointResolver(appCfg.AWS.SQS.Endpoint)
-	}
-
-	if appCfg.AWS.AccessKeyID != "" && appCfg.AWS.SecretAccessKey != "" {
-		// Usa credenciais explícitas se fornecidas
-		if endpointResolver != nil {
-			awsCfg, err = loadAWSConfig(ctx,
-				config.WithRegion(appCfg.AWS.Region),
-				config.WithEndpointResolverWithOptions(endpointResolver),
-				config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-					appCfg.AWS.AccessKeyID,
-					appCfg.AWS.SecretAccessKey,
-					"",
-				)),
-			)
-		} else {
-			awsCfg, err = loadAWSConfig(ctx,
-				config.WithRegion(appCfg.AWS.Region),
-				config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-					appCfg.AWS.AccessKeyID,
-					appCfg.AWS.SecretAccessKey,
-					"",
-				)),
-			)
-		}
-	} else {
-		// Usa credenciais padrão (IAM role, environment variables, etc)
-		if endpointResolver != nil {
-			awsCfg, err = loadAWSConfig(ctx,
-				config.WithRegion(appCfg.AWS.Region),
-				config.WithEndpointResolverWithOptions(endpointResolver),
-			)
-		} else {
-			awsCfg, err = loadAWSConfig(ctx,
-				config.WithRegion(appCfg.AWS.Region),
-			)
-		}
-	}
+	awsCfg, err := config.LoadDefaultConfig(
+		ctx,
+		config.WithRegion(appCfg.AWS.Region),
+		config.WithCredentialsProvider(
+			credentials.NewStaticCredentialsProvider(
+				appCfg.AWS.AccessKeyID,
+				appCfg.AWS.SecretAccessKey,
+				"",
+			),
+		),
+		config.WithBaseEndpoint(appCfg.AWS.Endpoint),
+	)
 
 	if err != nil {
 		queueLogFatalf("unable to load AWS SDK config, %v", err)
@@ -96,6 +52,7 @@ func NewSQSConsumer() *SQSConsumer {
 	}
 
 	client := sqs.NewFromConfig(awsCfg)
+
 	consumerCtx, cancel := context.WithCancel(ctx)
 
 	return &SQSConsumer{

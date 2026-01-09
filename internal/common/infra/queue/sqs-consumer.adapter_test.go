@@ -101,7 +101,7 @@ func TestNewSQSConsumer_WithDifferentAWSConfigs(t *testing.T) {
 	cfg := env.GetConfig()
 
 	t.Run("with endpoint and explicit credentials", func(t *testing.T) {
-		cfg.AWS.SQS.Endpoint = "http://localhost:9324"
+		cfg.AWS.Endpoint = "http://localhost:9324"
 		cfg.AWS.AccessKeyID = "access-key"
 		cfg.AWS.SecretAccessKey = "secret-key"
 
@@ -110,7 +110,7 @@ func TestNewSQSConsumer_WithDifferentAWSConfigs(t *testing.T) {
 	})
 
 	t.Run("with endpoint and without explicit credentials", func(t *testing.T) {
-		cfg.AWS.SQS.Endpoint = "http://localhost:9324"
+		cfg.AWS.Endpoint = "http://localhost:9324"
 		cfg.AWS.AccessKeyID = ""
 		cfg.AWS.SecretAccessKey = ""
 
@@ -119,7 +119,7 @@ func TestNewSQSConsumer_WithDifferentAWSConfigs(t *testing.T) {
 	})
 
 	t.Run("without endpoint and without explicit credentials", func(t *testing.T) {
-		cfg.AWS.SQS.Endpoint = ""
+		cfg.AWS.Endpoint = ""
 		cfg.AWS.AccessKeyID = ""
 		cfg.AWS.SecretAccessKey = ""
 
@@ -374,15 +374,4 @@ func TestConsumeQueue_AcceptsMessageHandlerType(t *testing.T) {
 	err := consumer.ConsumeQueue("queue-url", handler)
 	assert.NoError(t, err)
 	consumer.cancelFn()
-}
-
-func TestNewSQSEndpointResolver(t *testing.T) {
-	resolver := newSQSEndpointResolver("http://localhost:9324")
-
-	endpoint, err := resolver.ResolveEndpoint(sqs.ServiceID, "us-east-1")
-	assert.NoError(t, err)
-	assert.Equal(t, "http://localhost:9324", endpoint.URL)
-
-	_, err = resolver.ResolveEndpoint("sns", "us-east-1")
-	assert.Error(t, err)
 }
