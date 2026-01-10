@@ -8,6 +8,8 @@ import (
 	"payment_microservice/internal/core/dto"
 )
 
+var jsonMarshal = json.Marshal
+
 type SQSKitchenOrderService struct {
 	publisher ports.IQueuePublisher
 }
@@ -17,7 +19,7 @@ func NewSQSKitchenOrderService(publisher ports.IQueuePublisher) *SQSKitchenOrder
 }
 
 func (s *SQSKitchenOrderService) Create(ctx context.Context, dto dto.CreateKitchenOrderDTO) error {
-	dtoJSON, err := json.Marshal(dto)
+	dtoJSON, err := jsonMarshal(dto)
 
 	if err != nil {
 		return err

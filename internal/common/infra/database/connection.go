@@ -21,6 +21,7 @@ var (
 	gormOpenFn   func(dialector gorm.Dialector, config *gorm.Config) (*gorm.DB, error) = func(dialector gorm.Dialector, config *gorm.Config) (*gorm.DB, error) {
 		return gorm.Open(dialector, config)
 	}
+	dbLogFatalf func(format string, v ...interface{}) = log.Fatalf
 )
 
 func GetDB() *gorm.DB {
@@ -158,6 +159,6 @@ func RunMigrations() {
 	if err := dbConnection.AutoMigrate(
 		&repositories.PaymentModel{},
 	); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		dbLogFatalf("Failed to run migrations: %v", err)
 	}
 }

@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"payment_microservice/internal/common/config/env"
 	"testing"
 
@@ -116,6 +117,48 @@ func TestRunMigrations(t *testing.T) {
 	})
 
 	// Assert: todas as expectativas de SQL foram atendidas
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestRunMigrations_WhenDBNil(t *testing.T) {
+	cleanup := env.SetupTestEnv(t)
+	defer cleanup()
+
+	dbConnection = nil
+
+	assert.NotPanics(t, func() {
+		RunMigrations()
+	})
+}
+
+func TestRunMigrations_WhenAutoMigrateFails(t *testing.T) {
+	cleanup := env.SetupTestEnv(t)
+	defer cleanup()
+
+	mockDB, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer mockDB.Close()
+
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{
+		Conn: mockDB,
+	}), &gorm.Config{})
+	assert.NoError(t, err)
+
+	dbConnection = gormDB
+
+	mock.ExpectQuery("SELECT count\\(\\*\\) FROM information_schema.tables").
+		WillReturnError(errors.New("auto-migrate error"))
+
+	fatalCalled := false
+	originalFatal := dbLogFatalf
+	dbLogFatalf = func(format string, v ...interface{}) {
+		fatalCalled = true
+	}
+	t.Cleanup(func() { dbLogFatalf = originalFatal })
+
+	RunMigrations()
+
+	assert.True(t, fatalCalled)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 

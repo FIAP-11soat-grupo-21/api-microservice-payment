@@ -10,6 +10,7 @@ var AllowedPaymentStatus = []string{
 	constants.PAYMENT_STATUS_FAILED,
 	constants.PAYMENT_STATUS_PENDING,
 	constants.PAYMENT_STATUS_PAID,
+	constants.PAYMENT_STATUS_REFUNDED,
 }
 
 type Status struct {

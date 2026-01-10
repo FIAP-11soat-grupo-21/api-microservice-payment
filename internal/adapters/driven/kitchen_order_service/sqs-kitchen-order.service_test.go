@@ -59,3 +59,23 @@ func TestSQSKitchenOrderServiceCreatePublisherError(t *testing.T) {
 	assert.ErrorIs(t, err, expectedErr)
 	assert.True(t, publisher.called)
 }
+
+func TestSQSKitchenOrderServiceCreateMarshalError(t *testing.T) {
+	cleanup := env.SetupTestEnv(t)
+	defer cleanup()
+
+	originalMarshal := jsonMarshal
+	jsonMarshal = func(v interface{}) ([]byte, error) {
+		return nil, errors.New("marshal error")
+	}
+	t.Cleanup(func() { jsonMarshal = originalMarshal })
+
+	publisher := &mockQueuePublisher{}
+	service := NewSQSKitchenOrderService(publisher)
+
+	err := service.Create(context.Background(), dto.CreateKitchenOrderDTO{OrderID: "order-789"})
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "marshal error")
+	assert.False(t, publisher.called)
+}
