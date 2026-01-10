@@ -11,21 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Helper para criar payment com método específico (apenas para testes de validação)
-func createPaymentWithMethod(method value_objects.Method) *Payment {
-	amount, _ := value_objects.NewAmount(100.0)
-	status := value_objects.NewStatusDefault()
-
-	return &Payment{
-		ID:        "test-123",
-		OrderID:   "order-123",
-		Amount:    amount,
-		Status:    status,
-		Method:    method,
-		CreatedAt: time.Now(),
-	}
-}
-
 func TestNewPaymentDefault(t *testing.T) {
 	t.Run("should create payment with PIX method successfully", func(t *testing.T) {
 		id := "payment-123"
