@@ -188,3 +188,30 @@ func TestStatus_SetFailed(t *testing.T) {
 		assert.True(t, status.IsFailed())
 	})
 }
+
+func TestStatus_IsRefunded(t *testing.T) {
+	t.Run("should return true when status is refunded", func(t *testing.T) {
+		status, _ := NewStatus(constants.PAYMENT_STATUS_REFUNDED)
+
+		result := status.IsRefunded()
+		assert.True(t, result)
+	})
+
+	t.Run("should return false when status is not refunded", func(t *testing.T) {
+		status, _ := NewStatus(constants.PAYMENT_STATUS_PENDING)
+
+		result := status.IsRefunded()
+
+		assert.False(t, result)
+	})
+}
+
+func TestStatus_SetRefunded(t *testing.T) {
+	t.Run("should set status to refunded", func(t *testing.T) {
+		status, _ := NewStatus(constants.PAYMENT_STATUS_PENDING)
+
+		status.SetRefunded()
+		assert.Equal(t, constants.PAYMENT_STATUS_REFUNDED, status.Value())
+		assert.True(t, status.IsRefunded())
+	})
+}

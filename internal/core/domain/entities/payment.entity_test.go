@@ -268,6 +268,26 @@ func TestNewPayment(t *testing.T) {
 	})
 }
 
+func TestPayment_IsEmpty(t *testing.T) {
+	t.Run("should return true for empty payment", func(t *testing.T) {
+		payment := &Payment{}
+
+		assert.True(t, payment.IsEmpty())
+	})
+
+	t.Run("should return false for non-empty payment", func(t *testing.T) {
+		id := "payment-123"
+		orderID := "order-123"
+		amount := 100.50
+		method := constants.PIX_PAYMENT_METHOD
+		var qrData *string
+
+		payment, _ := NewPaymentDefault(id, orderID, amount, method, qrData)
+
+		assert.False(t, payment.IsEmpty())
+	})
+}
+
 func TestPayment_MarkAsPaid(t *testing.T) {
 	t.Run("should mark pending payment as paid", func(t *testing.T) {
 		id := "payment-123"
@@ -366,6 +386,53 @@ func TestPayment_MarkAsFailed(t *testing.T) {
 	})
 }
 
+func TestPayment_MarkAsRefunded(t *testing.T) {
+	t.Run("should mark pending payment as refunded", func(t *testing.T) {
+		id := "payment-123"
+		orderID := "order-123"
+		amount := 100.50
+		method := constants.PIX_PAYMENT_METHOD
+		var qrData *string
+
+		payment, _ := NewPaymentDefault(id, orderID, amount, method, qrData)
+
+		payment.MarkAsRefunded()
+
+		assert.True(t, payment.Status.IsRefunded())
+	})
+
+	t.Run("should mark paid payment as refunded", func(t *testing.T) {
+		id := "payment-123"
+		orderID := "order-123"
+		amount := 100.50
+		status := constants.PAYMENT_STATUS_PAID
+		method := constants.PIX_PAYMENT_METHOD
+		now := time.Now()
+		paidAt := now
+
+		payment, _ := NewPayment(id, orderID, amount, status, method, nil, &paidAt, now)
+
+		payment.MarkAsRefunded()
+
+		assert.True(t, payment.Status.IsRefunded())
+	})
+
+	t.Run("should keep refunded status when already refunded", func(t *testing.T) {
+		id := "payment-123"
+		orderID := "order-123"
+		amount := 100.50
+		status := constants.PAYMENT_STATUS_REFUNDED
+		method := constants.PIX_PAYMENT_METHOD
+		now := time.Now()
+
+		payment, _ := NewPayment(id, orderID, amount, status, method, nil, nil, now)
+
+		payment.MarkAsRefunded()
+
+		assert.True(t, payment.Status.IsRefunded())
+	})
+}
+
 func TestPayment_SetQrCode(t *testing.T) {
 	t.Run("should set QR code for PIX payment", func(t *testing.T) {
 		id := "payment-123"
@@ -434,14 +501,14 @@ func TestPayment_SetQrCode(t *testing.T) {
 		assert.Equal(t, qrCode, payment.QRCode.Value())
 	})
 
-	t.Run("should validate PIX requirement comprehensively", func(t *testing.T) {
-		pixMethod, _ := value_objects.NewMethod(constants.PIX_PAYMENT_METHOD)
-		payment := createPaymentWithMethod(pixMethod)
+	t.Run("should return error when setting QR code for non-PIX method", func(t *testing.T) {
+		payment := &Payment{Method: value_objects.Method{}}
 
-		qrCode := "00020126580014br.gov.bcb.pix"
-		err := payment.SetQrCode(qrCode)
+		err := payment.SetQrCode("any-qr")
 
-		assert.NoError(t, err)
-		assert.NotNil(t, payment.QRCode)
+		assert.Error(t, err)
+		assert.IsType(t, &exceptions.InvalidPaymentDataException{}, err)
+		assert.Nil(t, payment.QRCode)
 	})
+
 }

@@ -27,12 +27,6 @@ func NewPaymentDefault(id, orderID string, amount float64, method string, qrData
 
 	paymentStatus := value_objects.NewStatusDefault()
 
-	if !paymentMethod.IsPix() {
-		return nil, &exceptions.InvalidPaymentDataException{
-			Message: "only Pix payment method is supported",
-		}
-	}
-
 	paymentAmount, err := value_objects.NewAmount(amount)
 
 	if err != nil {
