@@ -191,4 +191,21 @@ func TestGetEnv(t *testing.T) {
 
 		assert.Equal(t, expectedValue, value)
 	})
+
+	t.Run("should fatal when variable not set", func(t *testing.T) {
+		key := "TEST_VAR_NOT_EXISTS"
+		os.Unsetenv(key)
+
+		called := false
+		originalFatal := envLogFatalf
+		envLogFatalf = func(format string, v ...interface{}) {
+			called = true
+		}
+		t.Cleanup(func() { envLogFatalf = originalFatal })
+
+		_ = getEnv(key)
+
+		assert.True(t, called)
+	})
+
 }
