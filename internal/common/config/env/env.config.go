@@ -51,8 +51,9 @@ type Config struct {
 }
 
 var (
-	instance *Config
-	once     sync.Once
+	instance     *Config
+	once         sync.Once
+	envLogFatalf func(format string, v ...interface{}) = log.Fatalf
 )
 
 func GetConfig() *Config {
@@ -66,7 +67,7 @@ func GetConfig() *Config {
 func getEnv(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		log.Fatalf("Environment variable %s is not set", key)
+		envLogFatalf("Environment variable %s is not set", key)
 	}
 	return value
 }

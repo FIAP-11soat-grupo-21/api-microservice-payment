@@ -11,8 +11,14 @@ import (
 	"payment_microservice/internal/core/use_cases"
 )
 
+var (
+	newQueuePublisher    = factory.NewQueuePublisher
+	newPaymentRepository = factory.NewPaymentRepository
+	newPaymentGateway    = factory.NewPaymentGateway
+)
+
 func sendRollbackEvent(ctx context.Context, orderID string) {
-	queuePublisher := factory.NewQueuePublisher()
+	queuePublisher := newQueuePublisher()
 
 	cfg := env.GetConfig()
 	topic := cfg.AWS.SNS.Topics.OrderError
@@ -38,8 +44,8 @@ func sendRollbackEvent(ctx context.Context, orderID string) {
 }
 
 func CreatePayment(msgBody []byte) error {
-	paymentRepository := factory.NewPaymentRepository()
-	paymentGateway := factory.NewPaymentGateway()
+	paymentRepository := newPaymentRepository()
+	paymentGateway := newPaymentGateway()
 	createPaymentUseCase := use_cases.NewCreatePaymentUseCase(paymentRepository, paymentGateway)
 
 	messageParsed, err := message.NewCreatePaymentMessageFromJSON(msgBody)
@@ -69,7 +75,7 @@ func CreatePayment(msgBody []byte) error {
 }
 
 func RollbackPayment(msgBody []byte) error {
-	paymentRepository := factory.NewPaymentRepository()
+	paymentRepository := newPaymentRepository()
 
 	rollbackPaymentUseCase := use_cases.NewRollbackPaymentUseCase(paymentRepository)
 
