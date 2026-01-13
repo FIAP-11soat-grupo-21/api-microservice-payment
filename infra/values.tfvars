@@ -16,9 +16,6 @@ container_environment_variables = {
   DB_NAME : "payment_db"
   DB_PORT : "5432"
 
-  MERCADOPAGO_ACCESS_TOKEN : "APP_USR-1759552174955251-121514-0add78ff150666b46a342875686de7a7-3068451447"
-  MERCADOPAGO_COLLECTOR_ID : "3068451447"
-  MERCADOPAGO_EXTERNAL_POS_ID : "tccaixafiapf2"
   MERCADOPAGO_API_URL : "https://api.mercadopago.com"
 }
 
