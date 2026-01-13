@@ -18,19 +18,19 @@ type mockQueuePublisher struct {
 	err       error
 }
 
-func (m *mockQueuePublisher) PublishOnQueue(ctx context.Context, queueName string, message []byte) error {
+func (m *mockQueuePublisher) PublishOnQueue(_ context.Context, queueName string, message []byte) error {
 	m.called = true
 	m.queueName = queueName
 	m.message = message
 	return m.err
 }
 
-func (m *mockQueuePublisher) PublishOnTopic(ctx context.Context, topic string, message []byte) error {
+func (m *mockQueuePublisher) PublishOnTopic(_ context.Context, _ string, _ []byte) error {
 	return nil
 }
 
 func TestSQSKitchenOrderServiceCreateSuccess(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	publisher := &mockQueuePublisher{}
@@ -47,7 +47,7 @@ func TestSQSKitchenOrderServiceCreateSuccess(t *testing.T) {
 }
 
 func TestSQSKitchenOrderServiceCreatePublisherError(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	expectedErr := errors.New("publish error")
@@ -61,7 +61,7 @@ func TestSQSKitchenOrderServiceCreatePublisherError(t *testing.T) {
 }
 
 func TestSQSKitchenOrderServiceCreateMarshalError(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	originalMarshal := jsonMarshal

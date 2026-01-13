@@ -28,7 +28,7 @@ func setupTestRouter() *gin.Engine {
 }
 
 func TestNewPaymentHandler(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	handler := NewPaymentHandler()

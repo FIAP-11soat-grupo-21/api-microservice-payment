@@ -9,7 +9,7 @@ import (
 )
 
 func TestNewPaymentGateway(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	t.Run("should create payment gateway successfully", func(t *testing.T) {

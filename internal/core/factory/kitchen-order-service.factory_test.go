@@ -9,7 +9,7 @@ import (
 )
 
 func TestNewKitchenOrderService(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	t.Run("should create kitchen order service successfully", func(t *testing.T) {

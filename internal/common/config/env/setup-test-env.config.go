@@ -2,10 +2,9 @@ package env
 
 import (
 	"os"
-	"testing"
 )
 
-func SetupTestEnv(t *testing.T) func() {
+func SetupTestEnv() func() {
 	// Salva os valores originais
 	originalValues := map[string]string{
 		"GO_ENV":                             os.Getenv("GO_ENV"),

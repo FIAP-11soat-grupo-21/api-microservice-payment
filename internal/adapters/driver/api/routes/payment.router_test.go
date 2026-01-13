@@ -9,7 +9,7 @@ import (
 )
 
 func TestRegisterPaymentRoutes(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	gin.SetMode(gin.TestMode)
@@ -36,7 +36,7 @@ func TestRegisterPaymentRoutes(t *testing.T) {
 }
 
 func TestRegisterPaymentRoutes_EndpointsAccessible(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	gin.SetMode(gin.TestMode)
@@ -56,7 +56,7 @@ func TestRegisterPaymentRoutes_EndpointsAccessible(t *testing.T) {
 }
 
 func TestRegisterPaymentRoutes_GroupPrefix(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	gin.SetMode(gin.TestMode)

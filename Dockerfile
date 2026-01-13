@@ -11,7 +11,7 @@ RUN go mod download
 RUN go build -buildvcs=false -o main.exe .
 
 #Etapa de execução
-FROM alpine:latest as runtime
+FROM alpine:3.23 AS runtime
 
 COPY --from=builder src/main.exe .
 COPY /.docker/config/load_env.sh .

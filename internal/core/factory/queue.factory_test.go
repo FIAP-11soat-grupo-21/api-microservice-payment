@@ -9,7 +9,7 @@ import (
 )
 
 func TestNewQueuePublisher(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	t.Run("should create queue publisher successfully", func(t *testing.T) {
@@ -36,7 +36,7 @@ func TestNewQueuePublisher(t *testing.T) {
 }
 
 func TestNewQueueConsumer(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	t.Run("should create queue consumer successfully", func(t *testing.T) {

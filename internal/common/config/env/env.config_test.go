@@ -9,7 +9,7 @@ import (
 
 func TestGetConfig(t *testing.T) {
 	t.Run("should return singleton config instance", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		config1 := GetConfig()
@@ -23,7 +23,7 @@ func TestGetConfig(t *testing.T) {
 
 func TestConfig_Load(t *testing.T) {
 	t.Run("should load all environment variables correctly", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		config := &Config{}
@@ -47,7 +47,7 @@ func TestConfig_Load(t *testing.T) {
 	})
 
 	t.Run("should set RunMigrations to true when DB_RUN_MIGRATIONS is true", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("DB_RUN_MIGRATIONS", "true")
@@ -59,7 +59,7 @@ func TestConfig_Load(t *testing.T) {
 	})
 
 	t.Run("should set RunMigrations to false when DB_RUN_MIGRATIONS is false", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("DB_RUN_MIGRATIONS", "false")
@@ -71,7 +71,7 @@ func TestConfig_Load(t *testing.T) {
 	})
 
 	t.Run("should set RunMigrations to false when DB_RUN_MIGRATIONS is any other value", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("DB_RUN_MIGRATIONS", "invalid")
@@ -83,7 +83,7 @@ func TestConfig_Load(t *testing.T) {
 	})
 
 	t.Run("should construct API.URL from Host and Port", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("API_HOST", "127.0.0.1")
@@ -100,7 +100,7 @@ func TestConfig_Load(t *testing.T) {
 
 func TestConfig_IsProduction(t *testing.T) {
 	t.Run("should return true when GO_ENV is production", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("GO_ENV", "production")
@@ -113,7 +113,7 @@ func TestConfig_IsProduction(t *testing.T) {
 	})
 
 	t.Run("should return false when GO_ENV is not production", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("GO_ENV", "development")
@@ -126,7 +126,7 @@ func TestConfig_IsProduction(t *testing.T) {
 	})
 
 	t.Run("should return false when GO_ENV is test", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("GO_ENV", "test")
@@ -141,7 +141,7 @@ func TestConfig_IsProduction(t *testing.T) {
 
 func TestConfig_IsDevelopment(t *testing.T) {
 	t.Run("should return true when GO_ENV is development", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("GO_ENV", "development")
@@ -154,7 +154,7 @@ func TestConfig_IsDevelopment(t *testing.T) {
 	})
 
 	t.Run("should return false when GO_ENV is not development", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("GO_ENV", "production")
@@ -167,7 +167,7 @@ func TestConfig_IsDevelopment(t *testing.T) {
 	})
 
 	t.Run("should return false when GO_ENV is test", func(t *testing.T) {
-		cleanup := SetupTestEnv(t)
+		cleanup := SetupTestEnv()
 		defer cleanup()
 
 		os.Setenv("GO_ENV", "test")

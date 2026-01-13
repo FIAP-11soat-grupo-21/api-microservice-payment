@@ -14,7 +14,7 @@ import (
 )
 
 func TestGetDB(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	// Reset singletons para teste isolado
@@ -26,7 +26,7 @@ func TestGetDB(t *testing.T) {
 }
 
 func TestConnect_AlreadyConnected(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	// Setup: criar uma conexão mock
@@ -50,7 +50,7 @@ func TestConnect_AlreadyConnected(t *testing.T) {
 }
 
 func TestClose_NoConnection(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	// Reset singleton
@@ -63,7 +63,7 @@ func TestClose_NoConnection(t *testing.T) {
 }
 
 func TestClose_WithConnection(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	// Setup: criar uma conexão mock
@@ -88,7 +88,7 @@ func TestClose_WithConnection(t *testing.T) {
 }
 
 func TestRunMigrations(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	// Setup: criar uma conexão mock
@@ -121,7 +121,7 @@ func TestRunMigrations(t *testing.T) {
 }
 
 func TestRunMigrations_WhenDBNil(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	dbConnection = nil
@@ -132,7 +132,7 @@ func TestRunMigrations_WhenDBNil(t *testing.T) {
 }
 
 func TestRunMigrations_WhenAutoMigrateFails(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	mockDB, mock, err := sqlmock.New()
@@ -163,7 +163,7 @@ func TestRunMigrations_WhenAutoMigrateFails(t *testing.T) {
 }
 
 func TestConnect_RetryLogic(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	// Reset singletons

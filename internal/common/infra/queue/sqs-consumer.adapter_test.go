@@ -75,7 +75,7 @@ func stubQueueFatal(t *testing.T) *bool {
 }
 
 func setupEnv(t *testing.T) func() {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	stubAWSConfigLoaderSuccess(t)
 	return cleanup
 }

@@ -44,7 +44,7 @@ func (m *mockSNSPublisher) Publish(ctx context.Context, params *sns.PublishInput
 }
 
 func setupPublisherEnv(t *testing.T) func() {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	stubAWSConfigLoaderSuccess(t)
 	return cleanup
 }

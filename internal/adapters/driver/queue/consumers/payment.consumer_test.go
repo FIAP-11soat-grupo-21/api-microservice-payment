@@ -19,7 +19,7 @@ type mockQueueExpectation struct {
 	err   error
 }
 
-func (m *mockQueueConsumer) ConsumeQueue(queueName string, handler ports.MessageHandler) error {
+func (m *mockQueueConsumer) ConsumeQueue(queueName string, _ ports.MessageHandler) error {
 	if len(m.queues) == 0 {
 		return nil
 	}
@@ -32,7 +32,7 @@ func (m *mockQueueConsumer) ConsumeQueue(queueName string, handler ports.Message
 }
 
 func TestPaymentConsumerRegisterSuccess(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	mockConsumer := &mockQueueConsumer{
@@ -50,7 +50,7 @@ func TestPaymentConsumerRegisterSuccess(t *testing.T) {
 }
 
 func TestPaymentConsumerRegisterCreatePaymentError(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	mockConsumer := &mockQueueConsumer{
@@ -69,7 +69,7 @@ func TestPaymentConsumerRegisterCreatePaymentError(t *testing.T) {
 }
 
 func TestPaymentConsumerRegisterRollbackError(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	mockConsumer := &mockQueueConsumer{
