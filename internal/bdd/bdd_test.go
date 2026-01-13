@@ -8,7 +8,7 @@ import (
 	"github.com/cucumber/godog"
 )
 
-func TestMain(m *testing.M) {
+func TestMain(_ *testing.M) {
 	status := godog.TestSuite{
 		ScenarioInitializer: suites.InitializeScenario,
 		Options: &godog.Options{

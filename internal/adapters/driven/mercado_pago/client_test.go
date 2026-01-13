@@ -13,7 +13,7 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	t.Run("should create client successfully with valid config", func(t *testing.T) {

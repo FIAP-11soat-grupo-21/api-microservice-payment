@@ -20,11 +20,11 @@ type mockQueuePublisher struct {
 	calledTopic    bool
 }
 
-func (m *mockQueuePublisher) PublishOnQueue(ctx context.Context, queueName string, message []byte) error {
+func (m *mockQueuePublisher) PublishOnQueue(_ context.Context, _ string, _ []byte) error {
 	return nil
 }
 
-func (m *mockQueuePublisher) PublishOnTopic(ctx context.Context, topic string, message []byte) error {
+func (m *mockQueuePublisher) PublishOnTopic(_ context.Context, topic string, message []byte) error {
 	m.calledTopic = true
 	m.publishedTopic = topic
 	m.publishedBody = message
@@ -36,7 +36,7 @@ type mockPaymentGateway struct {
 	err    error
 }
 
-func (m *mockPaymentGateway) CreatePIXBilling(pixBilling dto.CreatePIXBillingDTO) (dto.PIXBillingResultDTO, error) {
+func (m *mockPaymentGateway) CreatePIXBilling(_ dto.CreatePIXBillingDTO) (dto.PIXBillingResultDTO, error) {
 	return m.result, m.err
 }
 
@@ -49,27 +49,27 @@ type mockPaymentRepository struct {
 	deleteErr  error
 }
 
-func (m *mockPaymentRepository) Insert(ctx context.Context, payment entities.Payment) error {
+func (m *mockPaymentRepository) Insert(_ context.Context, payment entities.Payment) error {
 	m.inserted = &payment
 	return m.insertErr
 }
 
-func (m *mockPaymentRepository) FindByOrderID(ctx context.Context, orderID string) (entities.Payment, error) {
+func (m *mockPaymentRepository) FindByOrderID(_ context.Context, _ string) (entities.Payment, error) {
 	return m.findResult, m.findErr
 }
 
-func (m *mockPaymentRepository) Update(ctx context.Context, payment entities.Payment) error {
+func (m *mockPaymentRepository) Update(_ context.Context, _ entities.Payment) error {
 	return nil
 }
 
-func (m *mockPaymentRepository) Delete(ctx context.Context, paymentID string) error {
+func (m *mockPaymentRepository) Delete(_ context.Context, paymentID string) error {
 	m.deletedID = paymentID
 	return m.deleteErr
 }
 
 func TestCreatePayment(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		repo := &mockPaymentRepository{}
@@ -95,7 +95,7 @@ func TestCreatePayment(t *testing.T) {
 	})
 
 	t.Run("parse error", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		err := CreatePayment([]byte("invalid-json"))
@@ -104,7 +104,7 @@ func TestCreatePayment(t *testing.T) {
 	})
 
 	t.Run("use case error triggers rollback", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		repo := &mockPaymentRepository{insertErr: errors.New("insert fail")}
@@ -135,7 +135,7 @@ func TestCreatePayment(t *testing.T) {
 
 func TestRollbackPayment(t *testing.T) {
 	t.Run("parse error", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		repo := &mockPaymentRepository{}
@@ -150,7 +150,7 @@ func TestRollbackPayment(t *testing.T) {
 	})
 
 	t.Run("ignores self triggered", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		repo := &mockPaymentRepository{}
@@ -167,7 +167,7 @@ func TestRollbackPayment(t *testing.T) {
 	})
 
 	t.Run("successful delete", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		repo := &mockPaymentRepository{findResult: entities.Payment{ID: "p-1", OrderID: "order-123"}}
@@ -184,7 +184,7 @@ func TestRollbackPayment(t *testing.T) {
 	})
 
 	t.Run("find error", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		repo := &mockPaymentRepository{findErr: errors.New("find err")}
@@ -200,7 +200,7 @@ func TestRollbackPayment(t *testing.T) {
 	})
 
 	t.Run("no payment found", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		repo := &mockPaymentRepository{findResult: entities.Payment{}}
@@ -219,7 +219,7 @@ func TestRollbackPayment(t *testing.T) {
 
 func TestSendRollbackEvent(t *testing.T) {
 	t.Run("success publishes topic", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		pub := &mockQueuePublisher{}
@@ -234,7 +234,7 @@ func TestSendRollbackEvent(t *testing.T) {
 	})
 
 	t.Run("publish error still handled", func(t *testing.T) {
-		cleanup := env.SetupTestEnv(t)
+		cleanup := env.SetupTestEnv()
 		defer cleanup()
 
 		pub := &mockQueuePublisher{publishErr: errors.New("sns error")}

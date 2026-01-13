@@ -12,6 +12,7 @@ import (
 type godogReporter struct{}
 
 func (r *godogReporter) Errorf(_ string, _ ...interface{}) {
+	// Method is empty because godog does not require error reporting here.
 }
 func (r *godogReporter) Fatalf(format string, _ ...interface{}) { panic("gomock fatal: " + format) }
 

@@ -16,7 +16,7 @@ import (
 )
 
 func TestNewMercadoPagoGateway(t *testing.T) {
-	cleanup := env.SetupTestEnv(t)
+	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
 	t.Run("should create gateway successfully", func(t *testing.T) {
