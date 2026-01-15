@@ -51,7 +51,7 @@ jobs:
             -Dsonar.go.coverage.reportPaths=coverage.out
             -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
-            -Dsonar.coverage.exclusions="**/*_test.go,**/*mock*.go,**/mocks/**"
+            -Dsonar.coverage.exclusions="**/*_test.go,**/*mock*.go,**/mocks/**,**/bdd/**"
 
   build:
     needs: [SonarScan]
