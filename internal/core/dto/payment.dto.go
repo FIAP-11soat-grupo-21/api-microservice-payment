@@ -2,6 +2,7 @@ package dto
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 )
 
@@ -31,4 +32,13 @@ type CreatePIXBillingDTO struct {
 
 type PIXBillingResultDTO struct {
 	QRData string
+}
+
+type PaymentProcessedEventDTO struct {
+	OrderID string `json:"order_id"`
+	Status  string `json:"status"`
+}
+
+func (dto *PaymentProcessedEventDTO) ToJSON() ([]byte, error) {
+	return json.Marshal(dto)
 }

@@ -4,20 +4,22 @@ import (
 	"context"
 	"fmt"
 
+	"payment_microservice/internal/common/config/constants"
+	"payment_microservice/internal/common/config/env"
 	"payment_microservice/internal/core/domain/exceptions"
 	"payment_microservice/internal/core/domain/ports"
 	"payment_microservice/internal/core/dto"
 )
 
 type ConfirmPaymentUseCase struct {
-	repository          ports.IPaymentRepository
-	kitchenOrderService ports.IKitchenOrderService
+	repository       ports.IPaymentRepository
+	messagePublisher ports.IQueuePublisher
 }
 
-func NewConfirmPaymentUseCase(repository ports.IPaymentRepository, kitchenOrderService ports.IKitchenOrderService) *ConfirmPaymentUseCase {
+func NewConfirmPaymentUseCase(repository ports.IPaymentRepository, messagePublisher ports.IQueuePublisher) *ConfirmPaymentUseCase {
 	return &ConfirmPaymentUseCase{
-		repository:          repository,
-		kitchenOrderService: kitchenOrderService,
+		repository:       repository,
+		messagePublisher: messagePublisher,
 	}
 }
 
@@ -37,11 +39,20 @@ func (uc *ConfirmPaymentUseCase) Execute(ctx context.Context, eventDTO dto.Webho
 			return err
 		}
 
-		kitchenOrderDTO := dto.CreateKitchenOrderDTO{
-			OrderID: eventDTO.OrderID,
+		topic := env.GetConfig().AWS.SNS.Topics.PaymentProcessed
+
+		message := dto.PaymentProcessedEventDTO{
+			OrderID: payment.OrderID,
+			Status:  constants.ORDER_STATUS_CONFIRMED,
 		}
 
-		if err := uc.kitchenOrderService.Create(ctx, kitchenOrderDTO); err != nil {
+		messageJSON, err := message.ToJSON()
+
+		if err != nil {
+			return err
+		}
+
+		if err := uc.messagePublisher.PublishOnTopic(ctx, topic, messageJSON); err != nil {
 			return err
 		}
 	}

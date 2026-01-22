@@ -78,6 +78,7 @@ func (p *SQSPublisher) PublishOnQueue(ctx context.Context, queueName string, mes
 }
 
 func (p *SQSPublisher) PublishOnTopic(ctx context.Context, topic string, message []byte) error {
+	log.Printf("Publishing message to SNS topic %s: %s", topic, string(message))
 	input := &sns.PublishInput{
 		TopicArn: aws.String(topic),
 		Message:  aws.String(string(message)),

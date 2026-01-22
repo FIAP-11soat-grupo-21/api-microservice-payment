@@ -41,9 +41,15 @@ func sendRollbackEvent(ctx context.Context, orderID string) {
 	if err != nil {
 		log.Printf("Error publishing rollback event to SNS topic %s: %v", topic, err)
 	}
+
+	log.Println("Rollback event published successfully")
 }
 
 func CreatePayment(msgBody []byte) error {
+	messageCopy := msgBody
+
+	log.Println("Processing Create Payment message:", string(messageCopy))
+
 	paymentRepository := newPaymentRepository()
 	paymentGateway := newPaymentGateway()
 	createPaymentUseCase := use_cases.NewCreatePaymentUseCase(paymentRepository, paymentGateway)
@@ -90,6 +96,8 @@ func RollbackPayment(msgBody []byte) error {
 		// Ignore rollback messages triggered by the payment system itself
 		return nil
 	}
+
+	log.Printf("Processing Rollback Payment message for order ID: %s", messageParsed.OrderID)
 
 	ctx := context.Background()
 

@@ -36,19 +36,19 @@ func TestNewPaymentHandler(t *testing.T) {
 	assert.NotNil(t, handler)
 	assert.NotNil(t, handler.repository)
 	assert.NotNil(t, handler.gateway)
-	assert.NotNil(t, handler.kitchenOrderService)
+	assert.NotNil(t, handler.queuePublisher)
 }
 
 func TestCreatePixBilling_Success(t *testing.T) {
 	router := setupTestRouter()
 	mockRepo := new(mocks.MockPaymentRepository)
 	mockGateway := new(mocks.MockPaymentGateway)
-	mockKitchen := new(mocks.MockKitchenOrderService)
+	mockQueuePublisher := new(mocks.MockQueuePublisher)
 
 	handler := &PaymentHandler{
-		repository:          mockRepo,
-		gateway:             mockGateway,
-		kitchenOrderService: mockKitchen,
+		repository:     mockRepo,
+		gateway:        mockGateway,
+		queuePublisher: mockQueuePublisher,
 	}
 
 	router.POST("/payments/pix", handler.CreatePixBilling)
@@ -97,9 +97,9 @@ func TestCreatePixBilling_Success(t *testing.T) {
 func TestCreatePixBilling_InvalidJSON(t *testing.T) {
 	router := setupTestRouter()
 	handler := &PaymentHandler{
-		repository:          new(mocks.MockPaymentRepository),
-		gateway:             new(mocks.MockPaymentGateway),
-		kitchenOrderService: new(mocks.MockKitchenOrderService),
+		repository:     new(mocks.MockPaymentRepository),
+		gateway:        new(mocks.MockPaymentGateway),
+		queuePublisher: new(mocks.MockQueuePublisher),
 	}
 
 	router.POST("/payments/pix", handler.CreatePixBilling)
@@ -117,12 +117,12 @@ func TestCreatePixBilling_GatewayError(t *testing.T) {
 	router := setupTestRouter()
 	mockRepo := new(mocks.MockPaymentRepository)
 	mockGateway := new(mocks.MockPaymentGateway)
-	mockKitchen := new(mocks.MockKitchenOrderService)
+	mockQueuePublisher := new(mocks.MockQueuePublisher)
 
 	handler := &PaymentHandler{
-		repository:          mockRepo,
-		gateway:             mockGateway,
-		kitchenOrderService: mockKitchen,
+		repository:     mockRepo,
+		gateway:        mockGateway,
+		queuePublisher: mockQueuePublisher,
 	}
 
 	router.POST("/payments/pix", handler.CreatePixBilling)
@@ -151,12 +151,12 @@ func TestConfirmPayment_Success(t *testing.T) {
 	router := setupTestRouter()
 	mockRepo := new(mocks.MockPaymentRepository)
 	mockGateway := new(mocks.MockPaymentGateway)
-	mockKitchen := new(mocks.MockKitchenOrderService)
+	mockQueuePublisher := new(mocks.MockQueuePublisher)
 
 	handler := &PaymentHandler{
-		repository:          mockRepo,
-		gateway:             mockGateway,
-		kitchenOrderService: mockKitchen,
+		repository:     mockRepo,
+		gateway:        mockGateway,
+		queuePublisher: mockQueuePublisher,
 	}
 
 	router.POST("/payments/webhook", handler.ConfirmPayment)
@@ -176,9 +176,7 @@ func TestConfirmPayment_Success(t *testing.T) {
 
 	mockRepo.On("FindByOrderID", mock.Anything, "12345678").Return(payment, nil)
 	mockRepo.On("Update", mock.Anything, mock.Anything).Return(nil)
-	mockKitchen.On("Create", mock.Anything, mock.MatchedBy(func(dto dto.CreateKitchenOrderDTO) bool {
-		return dto.OrderID == "12345678"
-	})).Return(nil)
+	mockQueuePublisher.On("PublishOnTopic", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	requestBody := map[string]interface{}{
 		"id":           "webhook-id",
@@ -203,15 +201,15 @@ func TestConfirmPayment_Success(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, w.Code)
 
 	mockRepo.AssertExpectations(t)
-	mockKitchen.AssertExpectations(t)
+	mockQueuePublisher.AssertExpectations(t)
 }
 
 func TestConfirmPayment_InvalidJSON(t *testing.T) {
 	router := setupTestRouter()
 	handler := &PaymentHandler{
-		repository:          new(mocks.MockPaymentRepository),
-		gateway:             new(mocks.MockPaymentGateway),
-		kitchenOrderService: new(mocks.MockKitchenOrderService),
+		repository:     new(mocks.MockPaymentRepository),
+		gateway:        new(mocks.MockPaymentGateway),
+		queuePublisher: new(mocks.MockQueuePublisher),
 	}
 
 	router.POST("/payments/webhook", handler.ConfirmPayment)
@@ -229,12 +227,12 @@ func TestConfirmPayment_PaymentNotFound(t *testing.T) {
 	router := setupTestRouter()
 	mockRepo := new(mocks.MockPaymentRepository)
 	mockGateway := new(mocks.MockPaymentGateway)
-	mockKitchen := new(mocks.MockKitchenOrderService)
+	mockQueuePublisher := new(mocks.MockQueuePublisher)
 
 	handler := &PaymentHandler{
-		repository:          mockRepo,
-		gateway:             mockGateway,
-		kitchenOrderService: mockKitchen,
+		repository:     mockRepo,
+		gateway:        mockGateway,
+		queuePublisher: mockQueuePublisher,
 	}
 
 	router.POST("/payments/webhook", handler.ConfirmPayment)
@@ -271,12 +269,12 @@ func TestFindByOrderID_Success(t *testing.T) {
 	router := setupTestRouter()
 	mockRepo := new(mocks.MockPaymentRepository)
 	mockGateway := new(mocks.MockPaymentGateway)
-	mockKitchen := new(mocks.MockKitchenOrderService)
+	mockQueuePublisher := new(mocks.MockQueuePublisher)
 
 	handler := &PaymentHandler{
-		repository:          mockRepo,
-		gateway:             mockGateway,
-		kitchenOrderService: mockKitchen,
+		repository:     mockRepo,
+		gateway:        mockGateway,
+		queuePublisher: mockQueuePublisher,
 	}
 
 	router.GET("/payments/order/:orderID", handler.FindByOrderID)
@@ -321,12 +319,12 @@ func TestFindByOrderID_NotFound(t *testing.T) {
 	router := setupTestRouter()
 	mockRepo := new(mocks.MockPaymentRepository)
 	mockGateway := new(mocks.MockPaymentGateway)
-	mockKitchen := new(mocks.MockKitchenOrderService)
+	mockQueuePublisher := new(mocks.MockQueuePublisher)
 
 	handler := &PaymentHandler{
-		repository:          mockRepo,
-		gateway:             mockGateway,
-		kitchenOrderService: mockKitchen,
+		repository:     mockRepo,
+		gateway:        mockGateway,
+		queuePublisher: mockQueuePublisher,
 	}
 
 	// Adicionar middleware de erro para testar ctx.Error
@@ -355,12 +353,12 @@ func TestFindByOrderID_WithoutQRCode(t *testing.T) {
 	router := setupTestRouter()
 	mockRepo := new(mocks.MockPaymentRepository)
 	mockGateway := new(mocks.MockPaymentGateway)
-	mockKitchen := new(mocks.MockKitchenOrderService)
+	mockQueuePublisher := new(mocks.MockQueuePublisher)
 
 	handler := &PaymentHandler{
-		repository:          mockRepo,
-		gateway:             mockGateway,
-		kitchenOrderService: mockKitchen,
+		repository:     mockRepo,
+		gateway:        mockGateway,
+		queuePublisher: mockQueuePublisher,
 	}
 
 	router.GET("/payments/order/:orderID", handler.FindByOrderID)

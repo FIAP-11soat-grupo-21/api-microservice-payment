@@ -9,4 +9,6 @@ const (
 	PAYMENT_STATUS_PAID     = "paid"
 	PAYMENT_STATUS_FAILED   = "failed"
 	PAYMENT_STATUS_REFUNDED = "refunded"
+
+	ORDER_STATUS_CONFIRMED = "Confirmado"
 )

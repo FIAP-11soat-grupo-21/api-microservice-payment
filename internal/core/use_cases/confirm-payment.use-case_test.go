@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"payment_microservice/internal/common/config/constants"
+	"payment_microservice/internal/common/config/env"
 	"payment_microservice/internal/common/mocks"
 	"payment_microservice/internal/core/domain/entities"
 	"payment_microservice/internal/core/domain/exceptions"
@@ -18,20 +20,23 @@ import (
 func TestNewConfirmPaymentUseCase(t *testing.T) {
 	t.Run("should create use case with repository and kitchen order service", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
-		mockKitchenService := new(mocks.MockKitchenOrderService)
+		mockPublisher := new(mocks.MockQueuePublisher)
 
-		useCase := NewConfirmPaymentUseCase(mockRepo, mockKitchenService)
+		useCase := NewConfirmPaymentUseCase(mockRepo, mockPublisher)
 
 		assert.NotNil(t, useCase)
 		assert.Equal(t, mockRepo, useCase.repository)
-		assert.Equal(t, mockKitchenService, useCase.kitchenOrderService)
+		assert.Equal(t, mockPublisher, useCase.messagePublisher)
 	})
 }
 
 func TestConfirmPaymentUseCase_Execute(t *testing.T) {
+	cleanup := env.SetupTestEnv()
+	defer cleanup()
+
 	t.Run("should confirm payment and create kitchen order when event is payment.updated", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
-		mockKitchenService := new(mocks.MockKitchenOrderService)
+		mockPublisher := new(mocks.MockQueuePublisher)
 		ctx := context.Background()
 
 		orderID := "order-123"
@@ -62,21 +67,19 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 			return payment.ID == existingPayment.ID && payment.Status.IsPaid()
 		})).Return(nil)
 
-		mockKitchenService.On("Create", ctx, dto.CreateKitchenOrderDTO{
-			OrderID: orderID,
-		}).Return(nil)
+		mockPublisher.On("PublishOnTopic", ctx, mock.Anything, mock.Anything).Return(nil)
 
-		useCase := NewConfirmPaymentUseCase(mockRepo, mockKitchenService)
+		useCase := NewConfirmPaymentUseCase(mockRepo, mockPublisher)
 		err := useCase.Execute(ctx, eventDTO)
 
 		assert.NoError(t, err)
 		mockRepo.AssertExpectations(t)
-		mockKitchenService.AssertExpectations(t)
+		mockPublisher.AssertExpectations(t)
 	})
 
 	t.Run("should return error when payment is not found", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
-		mockKitchenService := new(mocks.MockKitchenOrderService)
+		mockPublisher := new(mocks.MockQueuePublisher)
 		ctx := context.Background()
 
 		orderID := "order-not-found"
@@ -89,7 +92,7 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 
 		mockRepo.On("FindByOrderID", ctx, orderID).Return(nil, errors.New("not found"))
 
-		useCase := NewConfirmPaymentUseCase(mockRepo, mockKitchenService)
+		useCase := NewConfirmPaymentUseCase(mockRepo, mockPublisher)
 		err := useCase.Execute(ctx, eventDTO)
 
 		assert.Error(t, err)
@@ -100,7 +103,7 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 
 	t.Run("should not update payment when event type is not payment", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
-		mockKitchenService := new(mocks.MockKitchenOrderService)
+		mockPublisher := new(mocks.MockQueuePublisher)
 		ctx := context.Background()
 
 		orderID := "order-123"
@@ -125,18 +128,18 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 
 		mockRepo.On("FindByOrderID", ctx, orderID).Return(existingPayment, nil)
 
-		useCase := NewConfirmPaymentUseCase(mockRepo, mockKitchenService)
+		useCase := NewConfirmPaymentUseCase(mockRepo, mockPublisher)
 		err := useCase.Execute(ctx, eventDTO)
 
 		assert.NoError(t, err)
 		mockRepo.AssertExpectations(t)
 		mockRepo.AssertNotCalled(t, "Update")
-		mockKitchenService.AssertNotCalled(t, "Create")
+		mockPublisher.AssertNotCalled(t, "Create")
 	})
 
 	t.Run("should not update payment when action is not payment.updated", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
-		mockKitchenService := new(mocks.MockKitchenOrderService)
+		mockPublisher := new(mocks.MockQueuePublisher)
 		ctx := context.Background()
 
 		orderID := "order-123"
@@ -161,18 +164,18 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 
 		mockRepo.On("FindByOrderID", ctx, orderID).Return(existingPayment, nil)
 
-		useCase := NewConfirmPaymentUseCase(mockRepo, mockKitchenService)
+		useCase := NewConfirmPaymentUseCase(mockRepo, mockPublisher)
 		err := useCase.Execute(ctx, eventDTO)
 
 		assert.NoError(t, err)
 		mockRepo.AssertExpectations(t)
 		mockRepo.AssertNotCalled(t, "Update")
-		mockKitchenService.AssertNotCalled(t, "Create")
+		mockPublisher.AssertNotCalled(t, "Create")
 	})
 
 	t.Run("should handle context cancellation", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
-		mockKitchenService := new(mocks.MockKitchenOrderService)
+		mockPublisher := new(mocks.MockQueuePublisher)
 		ctx, cancel := context.WithCancel(context.Background())
 
 		orderID := "order-123"
@@ -187,7 +190,7 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 
 		mockRepo.On("FindByOrderID", ctx, orderID).Return(nil, context.Canceled)
 
-		useCase := NewConfirmPaymentUseCase(mockRepo, mockKitchenService)
+		useCase := NewConfirmPaymentUseCase(mockRepo, mockPublisher)
 		err := useCase.Execute(ctx, eventDTO)
 
 		assert.Error(t, err)
@@ -197,7 +200,7 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 
 	t.Run("should execute successfully when payment found even with empty OrderID in event", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
-		mockKitchenService := new(mocks.MockKitchenOrderService)
+		mockPublisher := new(mocks.MockQueuePublisher)
 		ctx := context.Background()
 
 		eventDTO := dto.WebhookEventDTO{
@@ -221,21 +224,28 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 
 		mockRepo.On("FindByOrderID", ctx, "").Return(existingPayment, nil)
 		mockRepo.On("Update", ctx, mock.Anything).Return(nil)
-		mockKitchenService.On("Create", ctx, dto.CreateKitchenOrderDTO{
-			OrderID: "",
-		}).Return(nil)
 
-		useCase := NewConfirmPaymentUseCase(mockRepo, mockKitchenService)
+		topic := env.GetConfig().AWS.SNS.Topics.PaymentProcessed
+		message := dto.PaymentProcessedEventDTO{
+			OrderID: "",
+			Status:  constants.ORDER_STATUS_CONFIRMED,
+		}
+
+		messageJSON, _ := message.ToJSON()
+
+		mockPublisher.On("PublishOnTopic", ctx, topic, messageJSON).Return(nil)
+
+		useCase := NewConfirmPaymentUseCase(mockRepo, mockPublisher)
 		err := useCase.Execute(ctx, eventDTO)
 
 		assert.NoError(t, err)
 		mockRepo.AssertExpectations(t)
-		mockKitchenService.AssertExpectations(t)
+		mockPublisher.AssertExpectations(t)
 	})
 
 	t.Run("should return error when update fails", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
-		mockKitchenService := new(mocks.MockKitchenOrderService)
+		mockPublisher := new(mocks.MockQueuePublisher)
 		ctx := context.Background()
 
 		orderID := "order-123"
@@ -261,12 +271,12 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 		mockRepo.On("FindByOrderID", ctx, orderID).Return(existingPayment, nil)
 		mockRepo.On("Update", ctx, mock.Anything).Return(errors.New("update failed"))
 
-		useCase := NewConfirmPaymentUseCase(mockRepo, mockKitchenService)
+		useCase := NewConfirmPaymentUseCase(mockRepo, mockPublisher)
 		err := useCase.Execute(ctx, eventDTO)
 
 		assert.Error(t, err)
 		assert.EqualError(t, err, "update failed")
 		mockRepo.AssertExpectations(t)
-		mockKitchenService.AssertNotCalled(t, "Create")
+		mockPublisher.AssertNotCalled(t, "Create")
 	})
 }

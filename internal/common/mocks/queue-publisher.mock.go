@@ -2,21 +2,20 @@ package mocks
 
 import (
 	"context"
+
+	"github.com/stretchr/testify/mock"
 )
 
 type MockQueuePublisher struct {
-	PublishFunc func(ctx context.Context, routingKey string, body []byte) error
+	mock.Mock
 }
 
-func (m *MockQueuePublisher) PublishMessageWithContext(ctx context.Context, routingKey string, body []byte) error {
-	if m.PublishFunc != nil {
-		return m.PublishFunc(ctx, routingKey, body)
-	}
-	return nil
+func (m *MockQueuePublisher) PublishOnQueue(ctx context.Context, queueName string, body []byte) error {
+	args := m.Called(ctx, queueName, body)
+	return args.Error(0)
 }
 
-func NewMockQueuePublisher(publishFunc func(ctx context.Context, routingKey string, body []byte) error) *MockQueuePublisher {
-	return &MockQueuePublisher{
-		PublishFunc: publishFunc,
-	}
+func (m *MockQueuePublisher) PublishOnTopic(ctx context.Context, topic string, body []byte) error {
+	args := m.Called(ctx, topic, body)
+	return args.Error(0)
 }
