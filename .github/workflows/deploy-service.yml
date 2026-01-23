@@ -146,14 +146,16 @@ jobs:
 
       - name: Adjust tfvars with image tag
         working-directory: infra
+        env:
+          MERCADOPAGO_COLLECTOR_ID: ${{ secrets.MERCADOPAGO_COLLECTOR_ID }}
+          MERCADOPAGO_EXTERNAL_POS_ID: ${{ secrets.MERCADOPAGO_EXTERNAL_POS_ID }}
+          MERCADOPAGO_ACCESS_TOKEN: ${{ secrets.MERCADOPAGO_ACCESS_TOKEN }}
         run: |
           echo "Replacing variables in infra/values.tfvars with $IMAGE"
           sed -i -e "s|GHCR_IMAGE_TAG|${IMAGE}|g" values.tfvars
-          sed -i -e "s|AWS_ACCESS_KEY_ID|${AWS_ACCESS_KEY_ID}|g" values.tfvars
-          sed -i -e "s|AWS_SECRET_ACCESS_KEY|${AWS_SECRET_ACCESS_KEY}|g" values.tfvars
-          sed -i -e "s|MERCADOPAGO_COLLECTOR_ID|${MERCADOPAGO_COLLECTOR_ID}|g" values.tfvars
-          sed -i -e "s|MERCADOPAGO_EXTERNAL_POS_ID|${MERCADOPAGO_EXTERNAL_POS_ID}|g" values.tfvars
-          sed -i -e "s|MERCADOPAGO_ACCESS_TOKEN|${MERCADOPAGO_ACCESS_TOKEN}|g" values.tfvars
+          sed -i -e "s|MERCADOPAGO_COLLECTOR_ID_PLACEHOLDER|${MERCADOPAGO_COLLECTOR_ID}|g" values.tfvars
+          sed -i -e "s|MERCADOPAGO_EXTERNAL_POS_ID_PLACEHOLDER|${MERCADOPAGO_EXTERNAL_POS_ID}|g" values.tfvars
+          sed -i -e "s|MERCADOPAGO_ACCESS_TOKEN_PLACEHOLDER|${MERCADOPAGO_ACCESS_TOKEN}|g" values.tfvars
 
       - name: Terraform Init
         working-directory: infra
