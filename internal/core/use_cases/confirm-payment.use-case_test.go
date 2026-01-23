@@ -18,7 +18,7 @@ import (
 )
 
 func TestNewConfirmPaymentUseCase(t *testing.T) {
-	t.Run("should create use case with repository and kitchen order service", func(t *testing.T) {
+	t.Run("should create use case with repository and message publisher", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
 		mockPublisher := new(mocks.MockQueuePublisher)
 
@@ -34,7 +34,7 @@ func TestConfirmPaymentUseCase_Execute(t *testing.T) {
 	cleanup := env.SetupTestEnv()
 	defer cleanup()
 
-	t.Run("should confirm payment and create kitchen order when event is payment.updated", func(t *testing.T) {
+	t.Run("should confirm payment and publish message when event is payment.updated", func(t *testing.T) {
 		mockRepo := new(mocks.MockPaymentRepository)
 		mockPublisher := new(mocks.MockQueuePublisher)
 		ctx := context.Background()
