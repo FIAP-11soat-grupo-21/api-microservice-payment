@@ -83,7 +83,6 @@ internal/
 │   ├── driven/          # Adapters de saída (repositórios, gateways externos, serviços de fila)
 │   │   ├── mercado_pago/
 │   │   ├── repositories/
-│   │   └── kitchen_order_service/
 │   └── driver/          # Adapters de entrada (handlers HTTP, consumers de fila)
 │       ├── api/
 │       └── queue/

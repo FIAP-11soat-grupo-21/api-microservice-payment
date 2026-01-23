@@ -7,27 +7,27 @@ import (
 func SetupTestEnv() func() {
 	// Salva os valores originais
 	originalValues := map[string]string{
-		"GO_ENV":                             os.Getenv("GO_ENV"),
-		"API_PORT":                           os.Getenv("API_PORT"),
-		"API_HOST":                           os.Getenv("API_HOST"),
-		"WEBHOOK_URL":                        os.Getenv("WEBHOOK_URL"),
-		"DB_HOST":                            os.Getenv("DB_HOST"),
-		"DB_NAME":                            os.Getenv("DB_NAME"),
-		"DB_PORT":                            os.Getenv("DB_PORT"),
-		"DB_USERNAME":                        os.Getenv("DB_USERNAME"),
-		"DB_PASSWORD":                        os.Getenv("DB_PASSWORD"),
-		"DB_RUN_MIGRATIONS":                  os.Getenv("DB_RUN_MIGRATIONS"),
-		"MERCADOPAGO_ACCESS_TOKEN":           os.Getenv("MERCADOPAGO_ACCESS_TOKEN"),
-		"MERCADOPAGO_COLLECTOR_ID":           os.Getenv("MERCADOPAGO_COLLECTOR_ID"),
-		"MERCADOPAGO_EXTERNAL_POS_ID":        os.Getenv("MERCADOPAGO_EXTERNAL_POS_ID"),
-		"MERCADOPAGO_API_URL":                os.Getenv("MERCADOPAGO_API_URL"),
-		"AWS_REGION":                         os.Getenv("AWS_REGION"),
-		"AWS_ACCESS_KEY_ID":                  os.Getenv("AWS_ACCESS_KEY_ID"),
-		"AWS_SECRET_ACCESS_KEY":              os.Getenv("AWS_SECRET_ACCESS_KEY"),
-		"AWS_SQS_CREATE_PAYMENT_QUEUE":       os.Getenv("AWS_SQS_CREATE_PAYMENT_QUEUE"),
-		"AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE": os.Getenv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE"),
-		"AWS_SQS_ORDER_ERROR_QUEUE":          os.Getenv("AWS_SQS_ORDER_ERROR_QUEUE"),
-		"AWS_SNS_ORDER_ERROR_TOPIC":          os.Getenv("AWS_SNS_ORDER_ERROR_TOPIC"),
+		"GO_ENV":                              os.Getenv("GO_ENV"),
+		"API_PORT":                            os.Getenv("API_PORT"),
+		"API_HOST":                            os.Getenv("API_HOST"),
+		"WEBHOOK_URL":                         os.Getenv("WEBHOOK_URL"),
+		"DB_HOST":                             os.Getenv("DB_HOST"),
+		"DB_NAME":                             os.Getenv("DB_NAME"),
+		"DB_PORT":                             os.Getenv("DB_PORT"),
+		"DB_USERNAME":                         os.Getenv("DB_USERNAME"),
+		"DB_PASSWORD":                         os.Getenv("DB_PASSWORD"),
+		"DB_RUN_MIGRATIONS":                   os.Getenv("DB_RUN_MIGRATIONS"),
+		"MERCADOPAGO_ACCESS_TOKEN":            os.Getenv("MERCADOPAGO_ACCESS_TOKEN"),
+		"MERCADOPAGO_COLLECTOR_ID":            os.Getenv("MERCADOPAGO_COLLECTOR_ID"),
+		"MERCADOPAGO_EXTERNAL_POS_ID":         os.Getenv("MERCADOPAGO_EXTERNAL_POS_ID"),
+		"MERCADOPAGO_API_URL":                 os.Getenv("MERCADOPAGO_API_URL"),
+		"AWS_REGION":                          os.Getenv("AWS_REGION"),
+		"AWS_ACCESS_KEY_ID":                   os.Getenv("AWS_ACCESS_KEY_ID"),
+		"AWS_SECRET_ACCESS_KEY":               os.Getenv("AWS_SECRET_ACCESS_KEY"),
+		"AWS_SQS_CREATE_PAYMENT_QUEUE":        os.Getenv("AWS_SQS_CREATE_PAYMENT_QUEUE"),
+		"AWS_SQS_ORDER_ERROR_QUEUE":           os.Getenv("AWS_SQS_ORDER_ERROR_QUEUE"),
+		"AWS_SNS_ORDER_ERROR_TOPIC_ARN":       os.Getenv("AWS_SNS_ORDER_ERROR_TOPIC_ARN"),
+		"AWS_SNS_PAYMENT_PROCESSED_TOPIC_ARN": os.Getenv("AWS_SNS_PAYMENT_PROCESSED_TOPIC_ARN"),
 	}
 
 	// Define valores de teste
@@ -49,9 +49,9 @@ func SetupTestEnv() func() {
 	os.Setenv("AWS_ACCESS_KEY_ID", "test_access_key_id")
 	os.Setenv("AWS_SECRET_ACCESS_KEY", "test_secret_access_key")
 	os.Setenv("AWS_SQS_CREATE_PAYMENT_QUEUE", "test_create_payment_queue")
-	os.Setenv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE", "test_create_kitchen_order_queue")
 	os.Setenv("AWS_SQS_ORDER_ERROR_QUEUE", "test_order_error_queue")
-	os.Setenv("AWS_SNS_ORDER_ERROR_TOPIC", "test_order_error_topic")
+	os.Setenv("AWS_SNS_ORDER_ERROR_TOPIC_ARN", "test_order_error_topic")
+	os.Setenv("AWS_SNS_PAYMENT_PROCESSED_TOPIC_ARN", "test_payment_processed_topic")
 
 	// Retorna função de cleanup
 	return func() {

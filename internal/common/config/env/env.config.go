@@ -37,14 +37,14 @@ type Config struct {
 		SecretAccessKey string
 		SQS             struct {
 			Queues struct {
-				OrderError         string
-				CreateKitchenOrder string
-				CreatePayment      string
+				OrderError    string
+				CreatePayment string
 			}
 		}
 		SNS struct {
 			Topics struct {
-				OrderError string
+				OrderError       string
+				PaymentProcessed string
 			}
 		}
 	}
@@ -113,11 +113,11 @@ func (c *Config) Load() {
 
 	// SQS
 	c.AWS.SQS.Queues.CreatePayment = getEnv("AWS_SQS_CREATE_PAYMENT_QUEUE")
-	c.AWS.SQS.Queues.CreateKitchenOrder = getEnv("AWS_SQS_CREATE_KITCHEN_ORDER_QUEUE")
 	c.AWS.SQS.Queues.OrderError = getEnv("AWS_SQS_ORDER_ERROR_QUEUE")
 
 	// SNS
-	c.AWS.SNS.Topics.OrderError = getEnv("AWS_SNS_ORDER_ERROR_TOPIC")
+	c.AWS.SNS.Topics.OrderError = getEnv("AWS_SNS_ORDER_ERROR_TOPIC_ARN")
+	c.AWS.SNS.Topics.PaymentProcessed = getEnv("AWS_SNS_PAYMENT_PROCESSED_TOPIC_ARN")
 }
 
 func (c *Config) IsProduction() bool {

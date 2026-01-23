@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"payment_microservice/internal/common/config/env"
 	"payment_microservice/internal/core/domain/ports"
@@ -20,6 +21,18 @@ type sqsAPI interface {
 }
 
 var sqsConsumerSleep = time.Sleep
+
+type SNSNotification struct {
+	Type             string `json:"Type"`
+	MessageId        string `json:"MessageId"`
+	TopicArn         string `json:"TopicArn"`
+	Message          string `json:"Message"`
+	Timestamp        string `json:"Timestamp"`
+	SignatureVersion string `json:"SignatureVersion"`
+	Signature        string `json:"Signature"`
+	SigningCertURL   string `json:"SigningCertURL"`
+	UnsubscribeURL   string `json:"UnsubscribeURL"`
+}
 
 type SQSConsumer struct {
 	client    sqsAPI
@@ -119,7 +132,14 @@ func (c *SQSConsumer) processMessage(queueURL string, message types.Message, han
 		return nil
 	}
 
-	err := handler([]byte(*message.Body))
+	messageBody, err := c.unmarshallMessage(message)
+
+	if err != nil {
+		log.Printf("Error unmarshaling message ID %s: %v", *message.MessageId, err)
+		return err
+	}
+
+	err = handler(messageBody)
 
 	if err != nil {
 		return err
@@ -135,4 +155,15 @@ func (c *SQSConsumer) processMessage(queueURL string, message types.Message, han
 	}
 
 	return nil
+}
+
+func (c *SQSConsumer) unmarshallMessage(message types.Message) ([]byte, error) {
+	// Try to unmarshall as SNS notification first
+	var snsNotification SNSNotification
+	if err := json.Unmarshal([]byte(*message.Body), &snsNotification); err == nil && snsNotification.Type != "" {
+		return []byte(snsNotification.Message), nil
+	}
+
+	// Message was published directly to SQS
+	return []byte(*message.Body), nil
 }
